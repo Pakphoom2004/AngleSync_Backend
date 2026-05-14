@@ -4,30 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/AngleSync_Backend.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pose_landmarker_lite.task" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/output_angles.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/output_keypoints.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/process_videos.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/run_all.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/men/Close-grip Pushup_men.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/men/Plank_men.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/men/Push up_men.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/men/Split Jump_men.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/men/Squat_men.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/women/Close-grip Pushup_women.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/women/Plank_women.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/women/Plush-up_women.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/women/Split Jump_women.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reference_prepare/videos/women/Squat_women.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolo11m-pose.pt" afterDir="false" />
-    </list>
+    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -47,30 +24,36 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="3DCoGY4tH1BIdIigBQn8FwBIp6L" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.run_all.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_db.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;storage&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/pakphoom/AngleSync_Backend&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.main.executor": "Run",
+    "Python.run_all.executor": "Run",
+    "Python.test_db.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "analyze",
+    "last_opened_file_path": "/Users/pakphoom/AngleSync_Backend"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/videos" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/assets" />
+      <recent name="$PROJECT_DIR$/app" />
       <recent name="$PROJECT_DIR$/reference_prepare" />
       <recent name="$PROJECT_DIR$/config" />
     </key>
