@@ -4,22 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/exceptions/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/exceptions/invalid_keypoints_exception.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/exceptions/keypoint_not_detected_exception.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/exceptions/service_exception.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/feedback_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/graph_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/motion_analysis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/overlay_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/pose_detection.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/sessions_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pose_landmarker_lite.task" beforeDir="false" afterPath="$PROJECT_DIR$/assets/pose_landmarker_lite.task" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yolo11m-pose.pt" beforeDir="false" afterPath="$PROJECT_DIR$/assets/yolo11m-pose.pt" afterDir="false" />
-    </list>
+    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
