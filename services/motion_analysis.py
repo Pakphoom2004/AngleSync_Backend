@@ -30,6 +30,7 @@ def calculate_angle(a, b, c):
 
     return float(angle)
 
+
 # Extract joint angles from detected keypoints
 def extract_joint_angles(frame_data):
     keypoints = frame_data["yolo_keypoints"]

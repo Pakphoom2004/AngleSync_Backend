@@ -7,5 +7,4 @@ opencv-python==4.13.0.90
 matplotlib==3.10.7
 google-genai
 google-generativeai==0.8.6
-mediapipe
 ultralytics

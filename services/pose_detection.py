@@ -1,5 +1,3 @@
-import os
-
 import cv2
 import numpy as np
 
@@ -9,17 +7,6 @@ from exceptions import (
 )
 
 MODEL_PATH = "assets/yolo11m-pose.pt"
-MP_MODEL_PATH = "assets/pose_landmarker_lite.task"
-ULTRALYTICS_CONFIG_DIR = "/private/tmp/Ultralytics"
-ENABLE_MEDIAPIPE = os.getenv(
-    "ENABLE_MEDIAPIPE",
-    "0"
-).lower() in {
-    "1",
-    "true",
-    "yes",
-    "on"
-}
 
 CONF_THRES = 0.3
 KP_CONF_THRES = 0.15
@@ -46,16 +33,6 @@ KP_NAME = {
 
 
 def _load_pose_dependencies():
-
-    os.makedirs(
-        ULTRALYTICS_CONFIG_DIR,
-        exist_ok=True
-    )
-    os.environ.setdefault(
-        "YOLO_CONFIG_DIR",
-        ULTRALYTICS_CONFIG_DIR
-    )
-
     try:
         from ultralytics import YOLO
     except ImportError as error:
@@ -63,87 +40,14 @@ def _load_pose_dependencies():
             "Missing dependency: ultralytics. Install it before running analysis."
         ) from error
 
-    if not ENABLE_MEDIAPIPE:
-        return {
-            "mp": None,
-            "BaseOptions": None,
-            "PoseLandmarker": None,
-            "PoseLandmarkerOptions": None,
-            "VisionRunningMode": None,
-            "YOLO": YOLO
-        }
-
-    try:
-        import mediapipe as mp
-        from mediapipe.tasks import python
-        from mediapipe.tasks.python import vision
-    except ImportError as error:
-        raise ServiceException(
-            "Missing dependency: mediapipe. Install it before enabling MediaPipe."
-        ) from error
-
-    return {
-        "mp": mp,
-        "BaseOptions": python.BaseOptions,
-        "PoseLandmarker": vision.PoseLandmarker,
-        "PoseLandmarkerOptions": vision.PoseLandmarkerOptions,
-        "VisionRunningMode": vision.RunningMode,
-        "YOLO": YOLO
-    }
-
-
-# Detect additional wrist and ankle landmarks using MediaPipe
-def get_mp_points(
-        mp,
-        frame,
-        timestamp_ms,
-        pose
-):
-    mp_image = mp.Image(
-        image_format=mp.ImageFormat.SRGB,
-        data=frame
-    )
-    result = pose.detect_for_video(
-        mp_image,
-        timestamp_ms
-    )
-
-    if not result.pose_landmarks:
-        return None
-    landmarks = result.pose_landmarks[0]
-
-    def point(index):
-        return np.array([
-            landmarks[index].x,
-            landmarks[index].y
-        ])
-
-    return {
-        "left_wrist": point(15),
-        "right_wrist": point(16),
-        "left_ankle": point(27),
-        "right_ankle": point(28),
-    }
+    return YOLO
 
 
 # Detect body keypoints from uploaded exercise video
 def detect_body_keypoints(file: str):
-    deps = _load_pose_dependencies()
+    yolo_model = _load_pose_dependencies()
 
-    model = deps["YOLO"](MODEL_PATH)
-
-    pose = None
-    if deps["PoseLandmarker"] is not None:
-        options = deps["PoseLandmarkerOptions"](
-            base_options=deps["BaseOptions"](
-                model_asset_path=MP_MODEL_PATH,
-                delegate=deps["BaseOptions"].Delegate.CPU
-            ),
-            running_mode=deps["VisionRunningMode"].VIDEO
-        )
-        pose = deps["PoseLandmarker"].create_from_options(
-            options
-        )
+    model = yolo_model(MODEL_PATH)
 
     cap = cv2.VideoCapture(file)
     fps = (
@@ -191,17 +95,6 @@ def detect_body_keypoints(file: str):
                 conf = np.ones(len(xyn))
             if np.mean(conf) < KP_CONF_THRES:
                 continue
-            timestamp_ms = int(
-                (frame_id / fps) * 1000
-            )
-            mp_points = None
-            if pose is not None and deps["mp"] is not None:
-                mp_points = get_mp_points(
-                    deps["mp"],
-                    frame,
-                    timestamp_ms,
-                    pose
-                )
             frame_data = {
                 "frame": frame_id,
                 "time": round(
@@ -220,15 +113,7 @@ def detect_body_keypoints(file: str):
                         "confidence": float(conf[i])
                     }
                     for i in range(len(xyn))
-                ],
-                "mediapipe_points": (
-                    {
-                        k: v.tolist()
-                        for k, v in mp_points.items()
-                    }
-                    if mp_points
-                    else None
-                )
+                ]
             }
             keypoints_per_frame.append(
                 frame_data
@@ -240,8 +125,6 @@ def detect_body_keypoints(file: str):
             continue
 
     cap.release()
-    if pose is not None:
-        pose.close()
 
     # Validation
     if len(keypoints_per_frame) == 0:
