@@ -4,7 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="" />
+    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/outputs/highest_risk_frame.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/outputs/risk_graph.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/routes/analysis_routes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/analysis_results.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/Squat_men.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/test.mp4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exceptions/service_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/exceptions/service_exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/feedback_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/feedback_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/graph_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/graph_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/motion_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/motion_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/pose_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/pose_detection.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,6 +50,8 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.app.executor": "Run",
+    "Python.feedback_service.executor": "Run",
     "Python.main.executor": "Run",
     "Python.run_all.executor": "Run",
     "Python.test_db.executor": "Run",
@@ -42,7 +59,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "analyze",
+    "git-widget-placeholder": "route",
     "last_opened_file_path": "/Users/pakphoom/AngleSync_Backend"
   }
 }]]></component>

@@ -10,8 +10,12 @@ def calculate_angle(a, b, c):
     ba = a - b
     bc = c - b
 
+    ba_norm = np.linalg.norm(ba)
+    bc_norm = np.linalg.norm(bc)
+    if ba_norm == 0 or bc_norm == 0:
+        return 0
     cosine_angle = np.dot(ba, bc) / (
-        np.linalg.norm(ba) * np.linalg.norm(bc)
+            ba_norm * bc_norm
     )
 
     cosine_angle = np.clip(
