@@ -5,8 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/routes/exercise_route.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/image_13A92783-0D50-4772-A5B6-F2271976B0DB_1779651603.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/image_2C7FB75E-70DB-47AF-A993-ABFE1B68FA01_1779650500.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/image_48F653D6-C940-4368-A224-1321B8B6A085_1779650729.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/image_F5EEB933-78FF-4C74-A027-3B38D2E6B89B_1779651047.mp4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/motion_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/motion_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exceptions/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/exceptions/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/highest_risk_frame.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/highest_risk_frame.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/risk_graph.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/risk_graph.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/analysis_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/analysis_routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analysis_results.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/analysis_results.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/feedback_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/feedback_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

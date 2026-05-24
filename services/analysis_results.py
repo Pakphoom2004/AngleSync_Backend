@@ -12,11 +12,10 @@ from services.graph_service import (
 )
 
 from services.feedback_service import (
-    build_feedback_prompt,
     generate_advanced_feedback
 )
 
-from exceptions.service_exception import (
+from exceptions import (
     ServiceException
 )
 
@@ -93,12 +92,6 @@ def process_video_analysis(
         )
     )
 
-    feedback_prompt = (
-        build_feedback_prompt(
-            highest_frame_data
-        )
-    )
-
     try:
 
         feedback_result = (
@@ -108,14 +101,14 @@ def process_video_analysis(
             )
         )
 
-    except ServiceException as error:
+
+    except ServiceException:
 
         feedback_result = {
-            "prompt": feedback_prompt,
-            "feedback": {
-                "error": str(error)
-            },
-            "feedback_source": "error"
+            "form_summary": "AI feedback unavailable.",
+            "injury_risk": "Gemini API quota exceeded.",
+            "corrective_cues": "Please retry later.",
+            "practice_plan": "Analyze again after quota reset."
         }
 
     if accuracy_score >= 80:
@@ -128,53 +121,13 @@ def process_video_analysis(
         risk_level = "DANGEROUS"
 
     return {
-
-        "score": round(
-            accuracy_score,
-            2
-        ),
-
-        "risk_level":
-            risk_level,
-
+        "score": round(accuracy_score, 2),
+        "risk_level": risk_level,
         "selected_frame": {
-
-            "frame":
-                highest_risk_frame_index,
-
-            "time":
-                round(
-                    highest_frame_data[
-                        "time"
-                    ],
-                    2
-                ),
-
-            "risk":
-                round(
-                    highest_frame_data[
-                        "risk_score"
-                    ],
-                    2
-                )
+            "frame": highest_risk_frame_index,
+            "time": round(highest_frame_data["time"], 2),
+            "risk": round(highest_frame_data["risk_score"], 2)
         },
-
-        "graph_data":
-            graph_data,
-
-        "prompt":
-            feedback_result[
-                "prompt"
-            ],
-
-        "feedback":
-            feedback_result[
-                "feedback"
-            ],
-
-        "feedback_source":
-            feedback_result.get(
-                "feedback_source",
-                "unknown"
-            )
+        "graph_data": graph_data,
+        "feedback": feedback_result
     }
