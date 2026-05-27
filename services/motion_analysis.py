@@ -2,19 +2,19 @@ import numpy as np
 from exceptions import InvalidKeypointsException
 
 # Calculate angle between 3 points using vector analysis
-def calculate_angle(a, b, c):
-    a = np.array(a)
-    b = np.array(b)
-    c = np.array(c)
+def calculate_angle(first_angle, second_angle, third_angle):
+    first_angle = np.array(first_angle)
+    second_angle = np.array(second_angle)
+    third_angle = np.array(third_angle)
 
-    ba = a - b
-    bc = c - b
+    angle_one = first_angle - second_angle
+    angle_two = third_angle - second_angle
 
-    ba_norm = np.linalg.norm(ba)
-    bc_norm = np.linalg.norm(bc)
+    ba_norm = np.linalg.norm(angle_one)
+    bc_norm = np.linalg.norm(angle_two)
     if ba_norm == 0 or bc_norm == 0:
         return 0
-    cosine_angle = np.dot(ba, bc) / (
+    cosine_angle = np.dot(angle_one, angle_two) / (
             ba_norm * bc_norm
     )
 
@@ -29,7 +29,6 @@ def calculate_angle(a, b, c):
     )
 
     return float(angle)
-
 
 # Extract joint angles from detected keypoints
 def extract_joint_angles(frame_data):

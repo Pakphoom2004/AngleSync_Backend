@@ -5,19 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/routes/exercise_route.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/uploads/image_13A92783-0D50-4772-A5B6-F2271976B0DB_1779651603.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/uploads/image_2C7FB75E-70DB-47AF-A993-ABFE1B68FA01_1779650500.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/uploads/image_48F653D6-C940-4368-A224-1321B8B6A085_1779650729.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/uploads/image_F5EEB933-78FF-4C74-A027-3B38D2E6B89B_1779651047.mp4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/exceptions/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/exceptions/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/highest_risk_frame.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/highest_risk_frame.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/risk_graph.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/risk_graph.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/analysis_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/analysis_routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analysis_results.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/analysis_results.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/feedback_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/feedback_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,23 +33,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.app.executor": "Run",
-    "Python.feedback_service.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.run_all.executor": "Run",
-    "Python.test_db.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "route",
-    "last_opened_file_path": "/Users/pakphoom/AngleSync_Backend"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.feedback_service.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run_all.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_db.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;route&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/pakphoom/AngleSync_Backend&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
