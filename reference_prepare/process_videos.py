@@ -9,7 +9,7 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-from config.supabase_client import supabase
+from app.config.supabase_client import supabase
 import os
 
 

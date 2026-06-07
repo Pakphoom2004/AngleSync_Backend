@@ -56,3 +56,6 @@ htmlcov/
 
 # pyenv
 # .python-version
+uploads
+.vscode
+
