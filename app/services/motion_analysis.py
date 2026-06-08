@@ -11,19 +11,19 @@ MAX_MISMATCH_ANGLE_ERROR = 32.0
 MAX_MISMATCH_RANGE_ERROR = 38.0
 
 # Calculate angle between 3 points using vector analysis
-def calculate_angle(first_angle, second_angle, third_angle):
-    first_angle = np.array(first_angle)
-    second_angle = np.array(second_angle)
-    third_angle = np.array(third_angle)
+def calculate_angle(start_point, middle_point, end_point):
+    start_point = np.array(start_point)
+    middle_point = np.array(middle_point)
+    end_point = np.array(end_point)
 
-    angle_one = first_angle - second_angle
-    angle_two = third_angle - second_angle
+    vector_start = start_point - middle_point
+    vector_end = end_point - middle_point
 
-    ba_norm = np.linalg.norm(angle_one)
-    bc_norm = np.linalg.norm(angle_two)
+    ba_norm = np.linalg.norm(vector_start)
+    bc_norm = np.linalg.norm(vector_end)
     if ba_norm == 0 or bc_norm == 0:
         return 0
-    cosine_angle = np.dot(angle_one, angle_two) / (
+    cosine_angle = np.dot(vector_start, vector_end) / (
             ba_norm * bc_norm
     )
 
@@ -597,7 +597,6 @@ def validate_exercise_match(
         )
 
     return comparison
-
 
 def calculate_sequence_risk_scores(
         detected_angle_sequence,

@@ -246,6 +246,7 @@ def detect_sample_keypoints(file: str, sample_count: int = EARLY_CHECK_FRAMES):
     cap.release()
     return keypoints_per_frame
 
+
 ALLOWED_EXTENSIONS = {".mp4", ".mov"}
 MAX_DURATION_SECONDS = 60
 

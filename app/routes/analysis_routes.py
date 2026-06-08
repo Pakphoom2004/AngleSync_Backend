@@ -8,6 +8,7 @@ import shutil
 import threading
 
 from app.services.analysis_results import process_video_analysis
+from fastapi import APIRouter, UploadFile, File, Request
 from fastapi import Form
 
 router = APIRouter()
@@ -16,9 +17,11 @@ UPLOAD_DIR = "uploads"
 
 @router.post("/analyze/stream")
 async def analyze_video_stream(
+    request: Request,
     file: UploadFile = File(...),
     reference_video_id: int = Form(...)
 ):
+    base_url = str(request.base_url).rstrip("/") 
 
     async def event_generator():
         os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -50,7 +53,8 @@ async def analyze_video_stream(
                 result = process_video_analysis(
                     file_path,
                     reference_video_id,
-                    progress_callback=progress_callback
+                    progress_callback=progress_callback,
+                    base_url=base_url
                 )
                 events.put(
                     (

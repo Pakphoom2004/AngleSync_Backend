@@ -1,6 +1,3 @@
-import os
-BASE_URL = os.getenv("BASE_URL", "http://192.168.1.43:8000")
-
 from app.services.motion_analysis import (
     analyze_motion,
     extract_joint_angles,
@@ -10,7 +7,7 @@ from app.services.motion_analysis import (
 from app.services.pose_detection import (
     detect_body_keypoints,
     detect_sample_keypoints,
-    verify_file_type,       # เพิ่ม
+    verify_file_type,      
     verify_video_duration,
 )
 
@@ -31,7 +28,8 @@ from app.exceptions import (
 def process_video_analysis(
         video_path: str,
         reference_video_id: int,
-        progress_callback=None
+        progress_callback=None,
+        base_url="http://localhost:8000"
 ):
     def report_progress(percent, step, message):
         if progress_callback is not None:
@@ -187,7 +185,7 @@ def process_video_analysis(
             "risk_scores": [round(float(s), 2) for s in risk_scores],
             "frame_times": [round(float(f["time"]), 2) for f in angles_per_frame],
             "highest_risk_frame_index": highest_risk_frame_index,
-            "highest_risk_image_url": f"{BASE_URL}/outputs/highest_risk_frame.jpg",
+            "highest_risk_image_url": f"{base_url}/outputs/highest_risk_frame.jpg",
         },
         "feedback": feedback_result
     }
