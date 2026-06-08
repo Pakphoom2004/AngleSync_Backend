@@ -94,10 +94,10 @@ def generate_risk_graph(
         exist_ok=True
     )
 
-    output_path = "outputs/risk_graph.png"
-    plt.savefig(output_path)
+    risk_graph = "outputs/risk_graph.png"
+    plt.savefig(risk_graph)
     plt.close()
-    return output_path
+    return risk_graph
 
 # Save highest risk frame image
 def save_highest_risk_frame(
@@ -129,15 +129,15 @@ def save_highest_risk_frame(
             keypoints
         )
 
-    output_path = "outputs/highest_risk_frame.jpg"
+    risk_frame = "outputs/highest_risk_frame.jpg"
 
     cv2.imwrite(
-        output_path,
+        risk_frame,
         frame
     )
 
     cap.release()
-    return output_path
+    return risk_frame
 
 
 SKELETON_CONNECTIONS = [

@@ -10,6 +10,8 @@ from app.services.motion_analysis import (
 from app.services.pose_detection import (
     detect_body_keypoints,
     detect_sample_keypoints,
+    verify_file_type,       # เพิ่ม
+    verify_video_duration,
 )
 
 from app.services.graph_service import (
@@ -39,7 +41,10 @@ def process_video_analysis(
                 "percent": percent
             })
 
-    # ── STEP 1: Early exercise validation ──
+    verify_file_type(video_path)
+    verify_video_duration(video_path)
+
+    # STEP 1: Early exercise validation
     report_progress(20, "validating", "Checking exercise type...")
 
     reference_data = get_reference_angles_from_db(reference_video_id)
@@ -81,7 +86,7 @@ def process_video_analysis(
                     "practice_plan": "Record the same exercise as the selected reference before analyzing."
                 }
             }
-    # ── STEP 2: Full detection (ผ่าน validate แล้ว) ──
+    # STEP 2: Full detection (ผ่าน validate แล้ว)
     report_progress(30, "detecting", "Detecting pose...")
 
     keypoints_per_frame = detect_body_keypoints(
@@ -119,7 +124,7 @@ def process_video_analysis(
             }
         }
 
-    # ── ส่วนที่เหลือเหมือนเดิม ──
+    # STEP 3: Post-analysis processing
     accuracy_score = analysis_result["accuracy_score"]
     risk_scores = analysis_result["risk_scores"]
     highest_risk_frame_index = analysis_result["highest_risk_frame_index"]

@@ -59,11 +59,11 @@ def render_skeleton_overlay(
             -1
         )
 
-    output_path = "outputs/skeleton_overlay.png"
+    skeleton_overlay = "outputs/skeleton_overlay.png"
 
     cv2.imwrite(
-        output_path,
+        skeleton_overlay,
         overlay_frame
     )
 
-    return output_path
+    return skeleton_overlay

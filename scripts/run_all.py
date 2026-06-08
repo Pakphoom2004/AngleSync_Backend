@@ -1,5 +1,5 @@
 import os
-from reference_prepare.process_videos import process
+from scripts.process_videos import process
 
 VIDEO_ROOT = "videos"
 
