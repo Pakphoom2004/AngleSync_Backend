@@ -94,7 +94,7 @@ def generate_risk_graph(
         exist_ok=True
     )
 
-    risk_graph = "outputs/risk_graph.png"
+    risk_graph = "data/outputs/risk_graph.png"
     plt.savefig(risk_graph)
     plt.close()
     return risk_graph
@@ -129,7 +129,7 @@ def save_highest_risk_frame(
             keypoints
         )
 
-    risk_frame = "outputs/highest_risk_frame.jpg"
+    risk_frame = "data/outputs/highest_risk_frame.jpg"
 
     cv2.imwrite(
         risk_frame,

@@ -1,39 +1,32 @@
+import base64
 import json
 import mimetypes
 import os
+from time import time
+
 
 from dotenv import load_dotenv
-from google import genai as google_genai
+from openai import OpenAI
 
-from app.exceptions import (
-    ServiceException
-)
+from app.exceptions import ServiceException
 
 load_dotenv()
 
 PROMPT_TEMPLATE = """
-You are an expert fitness coach.
+You are an expert fitness coach analyzing posture from movement data.
 
-Analyze posture using:
-- joint angles
-- posture alignment
-- movement stability
-- injury risk
+Analyze the following using joint angles, alignment, stability, and injury risk.
+Focus on: shoulders, hips, knees, and spine.
 
-Focus on:
-- shoulders
-- hips
-- knees
-- spine
+Respond with valid JSON only. No markdown, no extra text.
 
-Return EXACTLY:
+Required keys:
+- "form_summary": overall posture assessment
+- "injury_risk": identified risk areas
+- "corrective_cues": actionable corrections
+- "practice_plan": recommended next steps
 
-Form Summary:
-Injury Risk:
-Corrective Cues:
-Practice Plan:
-
-Keep responses short and professional.
+Keep each value concise and professional.
 """
 
 FEEDBACK_KEYS = (
@@ -44,201 +37,127 @@ FEEDBACK_KEYS = (
 )
 
 DEFAULT_MODEL = os.getenv(
-    "GEMINI_MODEL",
-    "gemini-2.0-flash"
+    "ZAI_MODEL",
+    "glm-5v-turbo"
 )
 
+def build_feedback_prompt(analysis_data, prompt_template=PROMPT_TEMPLATE):
+    return f"{prompt_template}\n\nAnalysis Data:\n{analysis_data}".strip()
 
-def build_feedback_prompt(
-        analysis_data: dict,
-        prompt_template: str = PROMPT_TEMPLATE
-):
+# def _build_image_content(
+#         frame_path: str
+# ) -> dict:
+#     mime_type = (
+#         mimetypes.guess_type(frame_path)[0]
+#         or "image/jpeg"
+#     )
 
-    return f"""
-{prompt_template}
+#     with open(frame_path, "rb") as image_file:
+#         b64 = base64.b64encode(
+#             image_file.read()
+#         ).decode("utf-8")
 
-Return JSON only with these exact keys:
-- form_summary
-- injury_risk
-- corrective_cues
-- practice_plan
-
-Rules:
-- Output valid JSON only.
-- Each value must be a short string.
-- Do not use markdown.
-
-Analysis Data:
-{analysis_data}
-""".strip()
+#     return {
+#         "type": "image_url",
+#         "image_url": {
+#             "url": f"data:{mime_type};base64,{b64}"
+#         }
+#     }
 
 
-def _build_inline_image_part(
-        frame_path: str
-):
-
-    mime_type = (
-        mimetypes.guess_type(frame_path)[0]
-        or "application/octet-stream"
-    )
-
-    with open(
-        frame_path,
-        "rb"
-    ) as image_file:
-        image_bytes = image_file.read()
-
-    return google_genai.types.Part.from_bytes(
-        data=image_bytes,
-        mime_type=mime_type
-    )
-
-def _generate_with_google_genai(
-        prompt: str,
-        frame_path: str,
-        model_name: str
-):
-
-    api_key = os.getenv(
-        "GEMINI_API_KEY"
-    )
-
+def _generate_with_zai(prompt, frame_path, model_name):
+    api_key = os.getenv("ZAI_API_KEY")
     if not api_key:
-        raise ServiceException(
-            "Missing GEMINI_API_KEY in environment."
-        )
+        raise ServiceException("Missing ZAI_API_KEY in environment.")
 
-    client = google_genai.Client(
-        api_key=api_key
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://api.z.ai/api/coding/paas/v4"  # Coding Plan endpoint
     )
 
-    contents = [prompt]
+    content = [{"type": "text", "text": prompt}]
 
-    if os.path.exists(
-            frame_path
-    ):
-        contents.append(
-            _build_inline_image_part(
-                frame_path
-            )
-        )
-
-    try:
-        response = client.models.generate_content(
-            model=model_name,
-            contents=contents,
-            config=google_genai.types.GenerateContentConfig(
-                response_mime_type="application/json",
+    for attempt in range(3):
+        try:
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=[{"role": "user", "content": content}],
                 temperature=0.2
             )
-        )
-    except Exception as error:
-        raise ServiceException(
-            str(error)
-        ) from error
 
-    response_text = getattr(
-        response,
-        "text",
-        None
-    )
+            response_text = response.choices[0].message.content
+            if response_text:
+                return response_text.strip()
 
-    if response_text:
-        return response_text.strip()
+        except Exception as error:
+            if "429" in str(error) and attempt < 2:
+                wait = 5 * (attempt + 1)  # 5s, 10s
+                print(f"[DEBUG] Rate limited, retrying in {wait}s...")
+                time.sleep(wait)
+                continue
+            raise ServiceException(str(error)) from error
 
-    raise ServiceException(
-        "Gemini returned an empty response."
-    )
-
+    raise ServiceException("Z.AI rate limit exceeded after retries.")
 
 def parse_feedback_response(
         text: str
 ):
-
     feedback = {
         key: ""
         for key in FEEDBACK_KEYS
     }
 
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.split("```")[1]
+        if cleaned.startswith("json"):
+            cleaned = cleaned[4:]
+        cleaned = cleaned.strip()
+
     try:
-        parsed = json.loads(text)
+        parsed = json.loads(cleaned)
     except json.JSONDecodeError:
         parsed = None
 
-    if isinstance(
-            parsed,
-            dict
-    ):
+    if isinstance(parsed, dict):
         for key in FEEDBACK_KEYS:
-            value = parsed.get(
-                key,
-                ""
-            )
-            feedback[key] = str(
-                value or ""
-            ).strip()
+            value = parsed.get(key, "")
+            feedback[key] = str(value or "").strip()
     else:
         current_section = None
 
-        for line in text.splitlines():
-
+        for line in cleaned.splitlines():
             line = line.strip()
 
-            if line.startswith(
-                    "Form Summary:"
-            ):
-                current_section = (
-                    "form_summary"
-                )
+            if line.startswith("Form Summary:"):
+                current_section = "form_summary"
                 feedback[current_section] = line.replace(
-                    "Form Summary:",
-                    ""
+                    "Form Summary:", ""
                 ).strip()
-            elif line.startswith(
-                    "Injury Risk:"
-            ):
-                current_section = (
-                    "injury_risk"
-                )
+            elif line.startswith("Injury Risk:"):
+                current_section = "injury_risk"
                 feedback[current_section] = line.replace(
-                    "Injury Risk:",
-                    ""
+                    "Injury Risk:", ""
                 ).strip()
-            elif line.startswith(
-                    "Corrective Cues:"
-            ):
-                current_section = (
-                    "corrective_cues"
-                )
+            elif line.startswith("Corrective Cues:"):
+                current_section = "corrective_cues"
                 feedback[current_section] = line.replace(
-                    "Corrective Cues:",
-                    ""
+                    "Corrective Cues:", ""
                 ).strip()
-            elif line.startswith(
-                    "Practice Plan:"
-            ):
-                current_section = (
-                    "practice_plan"
-                )
+            elif line.startswith("Practice Plan:"):
+                current_section = "practice_plan"
                 feedback[current_section] = line.replace(
-                    "Practice Plan:",
-                    ""
+                    "Practice Plan:", ""
                 ).strip()
             elif current_section:
-                feedback[current_section] += (
-                    " " + line
-                )
+                feedback[current_section] += " " + line
 
     is_complete = all(
         feedback.get(key, "").strip()
         for key in FEEDBACK_KEYS
     )
 
-    return (
-        feedback,
-        is_complete
-    )
-
+    return feedback, is_complete
 
 def generate_advanced_feedback(
         analysis_data: dict,
@@ -252,19 +171,20 @@ def generate_advanced_feedback(
     )
 
     try:
-        response_text = (
-            _generate_with_google_genai(
-                prompt,
-                frame_path,
-                model_name
-            )
+        response_text = _generate_with_zai(
+            prompt,
+            frame_path,
+            model_name
         )
+        print(f"[DEBUG] response_text: {response_text}")
 
-        feedback, is_complete = (
-            parse_feedback_response(
-                response_text
-            )
+        feedback, is_complete = parse_feedback_response(
+            response_text
         )
+        print(f"[DEBUG] is_complete: {is_complete}")       
+        print(f"[DEBUG] feedback: {feedback}") 
+        if not is_complete:
+            raise ServiceException("Incomplete feedback from model.")
 
         if is_complete:
             return {
@@ -274,3 +194,6 @@ def generate_advanced_feedback(
 
     except ServiceException:
         raise
+    except Exception as e:                                
+        print(f"[DEBUG] error in generate_advanced_feedback: {type(e).__name__}: {e}")
+        raise ServiceException(str(e))

@@ -24,6 +24,9 @@ from app.exceptions import (
     ExerciseMismatchException,
     ServiceException
 )
+from app.repository.reference_repository import (
+    get_reference_angles_from_db
+)
 
 def process_video_analysis(
         video_path: str,
@@ -147,15 +150,27 @@ def process_video_analysis(
 
     try:
         feedback_result = generate_advanced_feedback(
-            highest_frame_data,
-            frame_path
-        )
-    except ServiceException:
-        feedback_result = {
+        highest_frame_data,
+        frame_path
+    )
+        print(f"[DEBUG] feedback_result: {feedback_result}")
+        feedback = feedback_result["feedback"]
+        print(f"[DEBUG] feedback: {feedback}")
+    except ServiceException as e:
+        print(f"[DEBUG] ServiceException: {e}")
+        feedback = {
             "form_summary": "AI feedback unavailable.",
-            "injury_risk": "Gemini API quota exceeded.",
+            "injury_risk": str(e),
             "corrective_cues": "Please retry later.",
-            "practice_plan": "Analyze again after quota reset."
+            "practice_plan": "Please retry later."
+        }
+    except Exception as e:
+        print(f"[DEBUG] Unexpected error: {type(e).__name__}: {e}")
+        feedback = {
+            "form_summary": "AI feedback unavailable.",
+            "injury_risk": str(e),
+            "corrective_cues": "Please retry later.",
+            "practice_plan": "Please retry later."
         }
 
     risk_level = (
@@ -187,81 +202,6 @@ def process_video_analysis(
             "highest_risk_frame_index": highest_risk_frame_index,
             "highest_risk_image_url": f"{base_url}/outputs/highest_risk_frame.jpg",
         },
-        "feedback": feedback_result
+        "feedback": feedback
     }
 
-def get_reference_angles_from_db(reference_video_id: int) -> dict:
-    from app.config.supabase_client import supabase
-
-    reference = supabase.table("exercise_reference") \
-        .select("exercise_name") \
-        .eq("reference_video_id", reference_video_id) \
-        .limit(1) \
-        .execute()
-
-    exercise_name = ""
-    if reference.data:
-        exercise_name = reference.data[0].get("exercise_name") or ""
-
-    # step 1
-    frames = supabase.table("exercise_reference_frame_data") \
-        .select("reference_frame_id, frame_sequence") \
-        .eq("parent_video_id", reference_video_id) \
-        .order("frame_sequence") \
-        .execute()
-
-    print(f"DEBUG reference_video_id: {reference_video_id}")
-    print(f"DEBUG frames found: {len(frames.data)}")
-
-    if not frames.data:
-        raise ValueError(f"No frames found for reference_video_id={reference_video_id}")
-
-    frame_ids = [
-        f["reference_frame_id"]
-        for f in frames.data
-    ]
-    frame_order = {
-        f["reference_frame_id"]: index
-        for index, f in enumerate(frames.data)
-    }
-
-    # step 2
-    metrics = supabase.table("exercise_reference_pose_metrics") \
-        .select("related_frame_id, joint_angle_data") \
-        .in_("related_frame_id", frame_ids) \
-        .execute()
-
-    print(f"DEBUG metrics found: {len(metrics.data)}")
-
-    if not metrics.data:
-        raise ValueError(f"No metrics found for frame_ids={frame_ids[:5]}")
-
-    sorted_metrics = sorted(
-        metrics.data,
-        key=lambda row: frame_order.get(
-            row["related_frame_id"],
-            0
-        )
-    )
-
-    all_angles = [
-        row["joint_angle_data"]
-        for row in sorted_metrics
-    ]
-
-    averaged = {}
-    for joint in all_angles[0].keys():
-        if joint in {"frame", "time"}:
-            continue
-        values = [f[joint] for f in all_angles if joint in f]
-        averaged[joint] = sum(values) / len(values)
-
-    return {
-        "exercise_name": exercise_name,
-        "average_angles": averaged,
-        "angle_sequence": all_angles
-    }
-
-
-def get_standard_angle_from_db(reference_video_id: int) -> dict:
-    return get_reference_angles_from_db(reference_video_id)["average_angles"]
