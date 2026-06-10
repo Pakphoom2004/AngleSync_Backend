@@ -4,7 +4,7 @@ import os
 
 from app.exceptions import (
     KeypointNotDetectedException,
-    ServiceException
+    PoseModuleNotFoundError
 )
 
 MODEL_PATH = "assets/yolo11m-pose.pt"
@@ -33,17 +33,12 @@ KP_NAME = {
     16: "right_ankle"
 }
 
-
 def _load_pose_dependencies():
     try:
         from ultralytics import YOLO
     except ImportError as error:
-        raise ServiceException(
-            "Missing dependency: ultralytics. Install it before running analysis."
-        ) from error
-
+        raise PoseModuleNotFoundError() from error
     return YOLO
-
 
 def _get_pose_model():
     global _POSE_MODEL
