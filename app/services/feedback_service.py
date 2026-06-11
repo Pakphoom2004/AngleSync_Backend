@@ -2,6 +2,7 @@ import base64
 import json
 import mimetypes
 import os
+import time
 from time import time
 
 
@@ -38,34 +39,13 @@ FEEDBACK_KEYS = (
 
 DEFAULT_MODEL = os.getenv(
     "ZAI_MODEL",
-    "glm-5v-turbo"
 )
 
 def build_feedback_prompt(analysis_data, prompt_template=PROMPT_TEMPLATE):
     return f"{prompt_template}\n\nAnalysis Data:\n{analysis_data}".strip()
 
-# def _build_image_content(
-#         frame_path: str
-# ) -> dict:
-#     mime_type = (
-#         mimetypes.guess_type(frame_path)[0]
-#         or "image/jpeg"
-#     )
 
-#     with open(frame_path, "rb") as image_file:
-#         b64 = base64.b64encode(
-#             image_file.read()
-#         ).decode("utf-8")
-
-#     return {
-#         "type": "image_url",
-#         "image_url": {
-#             "url": f"data:{mime_type};base64,{b64}"
-#         }
-#     }
-
-
-def _generate_with_zai(prompt, frame_path, model_name):
+def _generate_with_zai(prompt, model_name):
     api_key = os.getenv("ZAI_API_KEY")
     if not api_key:
         raise ServiceException("Missing ZAI_API_KEY in environment.")

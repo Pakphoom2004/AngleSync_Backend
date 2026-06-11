@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import os
 
 from app.exceptions import (
     KeypointNotDetectedException,
@@ -48,26 +47,6 @@ def _get_pose_model():
         _POSE_MODEL = yolo_model(MODEL_PATH)
 
     return _POSE_MODEL
-
-ALLOWED_EXTENSIONS = {".mp4", ".mov"}
-MAX_DURATION_SECONDS = 60
-
-def verify_file_type(file: str):
-    ext = os.path.splitext(file)[1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        return "Invalid file format. Please upload an MP4 or MOV file."
-    return None
-
-def verify_video_duration(file: str):
-    cap = cv2.VideoCapture(file)
-    fps = cap.get(cv2.CAP_PROP_FPS) or 30
-    total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-    cap.release()
-
-    duration = total_frames / fps
-    if duration > MAX_DURATION_SECONDS:
-        return "Video exceeds 60 seconds."
-    return None
 
 
 def _report_progress(progress_callback, percent, message):
@@ -259,5 +238,3 @@ def detect_sample_keypoints(file: str, sample_count: int = EARLY_CHECK_FRAMES):
 
     cap.release()
     return keypoints_per_frame
-
-

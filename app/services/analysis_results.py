@@ -1,3 +1,6 @@
+import io
+import base64
+
 from app.services.motion_analysis import (
     analyze_motion,
     extract_joint_angles,
@@ -7,8 +10,7 @@ from app.services.motion_analysis import (
 from app.services.pose_detection import (
     detect_body_keypoints,
     detect_sample_keypoints,
-    verify_file_type,      
-    verify_video_duration,
+   
 )
 
 from app.services.graph_service import (
@@ -19,13 +21,16 @@ from app.services.graph_service import (
 from app.services.feedback_service import (
     generate_advanced_feedback
 )
-
 from app.exceptions import (
     ExerciseMismatchException,
     ServiceException
 )
 from app.repository.reference_repository import (
     get_reference_angles_from_db
+)
+from app.services.video_validation import (
+    verify_file_type,
+    verify_video_duration
 )
 
 def process_video_analysis(
@@ -55,10 +60,10 @@ def process_video_analysis(
     sample_angle_sequence = []
     for frame in sample_keypoints:
         angles = extract_joint_angles(frame)
-        if angles is not None:          # ต้องอยู่ใน for loop
+        if angles is not None:
             sample_angle_sequence.append(angles)
 
-    if len(sample_angle_sequence) < 5:  # ต้องอยู่ใน function
+    if len(sample_angle_sequence) < 5:
         pass
     else:
         try:
@@ -87,7 +92,8 @@ def process_video_analysis(
                     "practice_plan": "Record the same exercise as the selected reference before analyzing."
                 }
             }
-    # STEP 2: Full detection (ผ่าน validate แล้ว)
+
+    # STEP 2: Full detection
     report_progress(30, "detecting", "Detecting pose...")
 
     keypoints_per_frame = detect_body_keypoints(
@@ -134,11 +140,16 @@ def process_video_analysis(
 
     report_progress(82, "generating_graph", "Generating risk graph...")
 
-    graph_image_path = generate_risk_graph(
+    graph_image = generate_risk_graph(
         risk_scores,
         highest_risk_frame_index,
         frame_times=[frame["time"] for frame in angles_per_frame]
     )
+
+    # แปลง PIL Image เป็น base64
+    buf = io.BytesIO()
+    graph_image.save(buf, format="PNG")
+    graph_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
 
     frame_path = save_highest_risk_frame(
         video_path,
@@ -150,9 +161,9 @@ def process_video_analysis(
 
     try:
         feedback_result = generate_advanced_feedback(
-        highest_frame_data,
-        frame_path
-    )
+            highest_frame_data,
+            frame_path
+        )
         print(f"[DEBUG] feedback_result: {feedback_result}")
         feedback = feedback_result["feedback"]
         print(f"[DEBUG] feedback: {feedback}")
@@ -196,7 +207,7 @@ def process_video_analysis(
             "image": frame_path
         },
         "graph_data": {
-            "graph_image": graph_image_path,
+            "graph_image": f"data:image/png;base64,{graph_base64}",
             "risk_scores": [round(float(s), 2) for s in risk_scores],
             "frame_times": [round(float(f["time"]), 2) for f in angles_per_frame],
             "highest_risk_frame_index": highest_risk_frame_index,
@@ -204,4 +215,3 @@ def process_video_analysis(
         },
         "feedback": feedback
     }
-

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, File, Form, Request, UploadFile
 from fastapi.responses import StreamingResponse
 import asyncio
 import json
@@ -8,8 +8,6 @@ import shutil
 import threading
 
 from app.services.analysis_results import process_video_analysis
-from fastapi import APIRouter, UploadFile, File, Request
-from fastapi import Form
 
 router = APIRouter()
 UPLOAD_DIR = "uploads"
@@ -21,7 +19,7 @@ async def analyze_video_stream(
     file: UploadFile = File(...),
     reference_video_id: int = Form(...)
 ):
-    base_url = str(request.base_url).rstrip("/") 
+    base_url = str(request.base_url).rstrip("/")
 
     async def event_generator():
         os.makedirs(UPLOAD_DIR, exist_ok=True)

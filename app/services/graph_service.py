@@ -6,13 +6,20 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 # Generate risk graph from frame-by-frame risk scores
+import io
+import os
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from PIL import Image
+
+
 def generate_risk_graph(
         risk_scores: tuple,
         highest_risk_frame_index: int,
         frame_times=None,
         fps: int = 30
 ):
-
     if frame_times:
         time_axis = [
             round(float(time), 2)
@@ -67,10 +74,7 @@ def generate_risk_graph(
             highest_risk_time,
             highest_risk_score
         ),
-        xytext=(
-            12,
-            18
-        ),
+        xytext=(12, 18),
         textcoords="offset points",
         arrowprops={
             "arrowstyle": "->",
@@ -89,15 +93,12 @@ def generate_risk_graph(
     plt.legend(loc="best")
     plt.tight_layout()
 
-    os.makedirs(
-        "outputs",
-        exist_ok=True
-    )
-
-    risk_graph = "data/outputs/risk_graph.png"
-    plt.savefig(risk_graph)
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png")
     plt.close()
-    return risk_graph
+    buf.seek(0)
+
+    return Image.open(buf)
 
 # Save highest risk frame image
 def save_highest_risk_frame(
