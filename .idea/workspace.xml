@@ -5,9 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/exceptions/PoseModuleNotFoundError.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M10_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M11_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M12_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M13_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M14_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M15_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M1_008.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M2_009.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M3_011.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M4_011.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M5_011.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M6_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M7_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M8_012.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/feature1/UT_M9_012.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/pose_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/pose_detection.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,6 +52,8 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests in feature1.executor": "Run",
+    "Python tests.Python tests in test.executor": "Run",
     "Python.app.executor": "Run",
     "Python.feedback_service.executor": "Run",
     "Python.main.executor": "Run",
@@ -48,7 +63,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "debugging",
+    "git-widget-placeholder": "test",
     "last_opened_file_path": "/Users/pakphoom/AngleSync_Backend"
   }
 }]]></component>
@@ -64,7 +79,7 @@
       <recent name="$PROJECT_DIR$/config" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python tests.Python tests in test">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
@@ -87,6 +102,42 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="Python tests in feature1" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="AngleSync_Backend" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/app/test/feature1" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/feature1&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="AngleSync_Backend" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/app/test" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.Python tests in test" />
+        <item itemvalue="Python tests.Python tests in feature1" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
