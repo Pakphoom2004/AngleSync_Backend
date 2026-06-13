@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 from app.services.graph_service import draw_skeleton_on_frame
-
+from unittest.mock import patch, call
 
 KP01 = [
     {"id": 0,  "name": "nose",           "x": 0.4680759608745575,  "y": 0.13428252935409546, "confidence": 0.8291665315628052},
@@ -29,7 +29,11 @@ KP01_ZERO_LEFT_EYE = [
     else {**kp, "confidence": 0.0}
     for kp in KP01
 ]
-
+KP01_ZERO_LEFT_SHOULDER = [
+    kp if kp["name"] != "left_shoulder"
+    else {**kp, "confidence": 0.0}
+    for kp in KP01
+]
 
 class TestDrawSkeletonOnFrame:
 
@@ -43,11 +47,15 @@ class TestDrawSkeletonOnFrame:
     def test_skips_keypoint_with_zero_confidence(self):
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
 
-        result = draw_skeleton_on_frame(frame, KP01_ZERO_LEFT_EYE)
+        with patch("app.services.graph_service.cv2.circle") as mock_circle, \
+                patch("app.services.graph_service.cv2.line"):
+            draw_skeleton_on_frame(frame, KP01_ZERO_LEFT_SHOULDER)
 
-        # left_eye x=0.0, y=0.0 → pixel (0, 0)
-        # ถ้า skip แล้ว pixel (0,0) ต้องยังเป็น [0,0,0]
-        assert result[0, 0].tolist() == [0, 0, 0]
+            # KP01 มี 17 จุด ถ้า skip left_shoulder → วาดได้แค่ 16 จุด
+            # cv2.circle ถูกเรียก 2 ครั้งต่อ 1 จุด (circle ใหญ่ + เล็ก)
+            call_count = mock_circle.call_count
+            assert call_count == 16 * 2, \
+                f"Expected 32 circle calls (16 joints × 2), got {call_count}"
 
     def test_draws_skeleton_lines_with_correct_color(self):
         frame = np.zeros((480, 640, 3), dtype=np.uint8)

@@ -27,7 +27,6 @@ class TestGenerateWithZai:
 
         result = _generate_with_zai(
             "You are an expert fitness coach.",
-            "squat_frame_150.jpg",
             "gemini-2.0-flash"
         )
 
@@ -47,6 +46,5 @@ class TestGenerateWithZai:
         with pytest.raises(ServiceException):
             _generate_with_zai(
                 "You are an expert fitness coach.",
-                "squat_frame_150.jpg",
                 "gemini-2.0-flash"
             )

@@ -107,55 +107,54 @@ def _patch_all(
 class TestProcessVideoAnalysis:
 
     def test_returns_completed_status_when_video_matches(self):
-        with patch.multiple("", **_patch_all()):
-            with patch("app.services.analysis_results.verify_file_type"),\
-                 patch("app.services.analysis_results.verify_video_duration", return_value=None),\
-                 patch("app.services.analysis_results.get_reference_angles_from_db", return_value=REFERENCE_DATA),\
-                 patch("app.services.analysis_results.detect_sample_keypoints", return_value=KEYPOINTS_PER_FRAME),\
-                 patch("app.services.analysis_results.extract_joint_angles", return_value={"left_knee": 173.4}),\
-                 patch("app.services.analysis_results.validate_exercise_match"),\
-                 patch("app.services.analysis_results.detect_body_keypoints", return_value=KEYPOINTS_PER_FRAME),\
-                 patch("app.services.analysis_results.analyze_motion", return_value=MOCK_ANALYSIS_RESULT),\
-                 patch("app.services.analysis_results.generate_risk_graph", return_value=MagicMock()),\
-                 patch("app.services.analysis_results.save_highest_risk_frame", return_value="data/outputs/highest_risk_frame.jpg"),\
-                 patch("app.services.analysis_results.generate_advanced_feedback", return_value=MOCK_FEEDBACK):
+        with patch("app.services.analysis_results.verify_file_type"), \
+                patch("app.services.analysis_results.verify_video_duration", return_value=None), \
+                patch("app.services.analysis_results.get_reference_angles_from_db", return_value=REFERENCE_DATA), \
+                patch("app.services.analysis_results.detect_sample_keypoints", return_value=KEYPOINTS_PER_FRAME), \
+                patch("app.services.analysis_results.extract_joint_angles", return_value={"left_knee": 173.4}), \
+                patch("app.services.analysis_results.validate_exercise_match"), \
+                patch("app.services.analysis_results.detect_body_keypoints", return_value=KEYPOINTS_PER_FRAME), \
+                patch("app.services.analysis_results.analyze_motion", return_value=MOCK_ANALYSIS_RESULT), \
+                patch("app.services.analysis_results.generate_risk_graph", return_value=MagicMock()), \
+                patch("app.services.analysis_results.save_highest_risk_frame",
+                      return_value="data/outputs/highest_risk_frame.jpg"), \
+                patch("app.services.analysis_results.generate_advanced_feedback", return_value=MOCK_FEEDBACK):
+            result = process_video_analysis("exercise_vid.mp4", 4, None)
 
-                result = process_video_analysis("exercise_vid.mp4", 4, None)
-
-        assert result["status"]      == "completed"
+        assert result["status"] == "completed"
         assert result["can_analyze"] is True
         assert isinstance(result["score"], float)
         assert result["score_scale"] == 100
-        assert result["risk_level"]  in ("GOOD", "NORMAL", "DANGEROUS")
-        assert "exercise_match"  in result
-        assert "selected_frame"  in result
-        assert "graph_data"      in result
-        assert "feedback"        in result
+        assert result["risk_level"] in ("GOOD", "NORMAL", "DANGEROUS")
+        assert "exercise_match" in result
+        assert "selected_frame" in result
+        assert "graph_data" in result
+        assert "feedback" in result
 
     def test_returns_mismatch_status_when_exercise_does_not_match(self):
         mismatch_error = ExerciseMismatchException(
             similarity_score=20.0,
             details={
-                "average_angle_error":  80.0,
+                "average_angle_error": 80.0,
                 "movement_range_error": 60.0,
                 "rule_check": {"passed": False}
             }
         )
 
-        with patch("app.services.analysis_results.verify_file_type"),\
-             patch("app.services.analysis_results.verify_video_duration", return_value=None),\
-             patch("app.services.analysis_results.get_reference_angles_from_db", return_value=REFERENCE_DATA),\
-             patch("app.services.analysis_results.detect_sample_keypoints", return_value=KEYPOINTS_PER_FRAME),\
-             patch("app.services.analysis_results.extract_joint_angles", return_value={"left_knee": 90.0}),\
-             patch("app.services.analysis_results.validate_exercise_match", side_effect=mismatch_error):
-
+        with patch("app.services.analysis_results.verify_file_type"), \
+                patch("app.services.analysis_results.verify_video_duration", return_value=None), \
+                patch("app.services.analysis_results.get_reference_angles_from_db", return_value=REFERENCE_DATA), \
+                patch("app.services.analysis_results.detect_sample_keypoints", return_value=KEYPOINTS_PER_FRAME), \
+                patch("app.services.analysis_results.extract_joint_angles", return_value={"left_knee": 90.0}), \
+                patch("app.services.analysis_results.validate_exercise_match", side_effect=mismatch_error), \
+                patch("app.services.analysis_results.detect_body_keypoints", return_value=KEYPOINTS_PER_FRAME):
             result = process_video_analysis("wrong_exercise.mp4", 4, None)
 
-        assert result["status"]                        == "exercise_mismatch"
-        assert result["can_analyze"]                   is False
-        assert result["score"]                         == 0.0
-        assert result["risk_level"]                    == "MISMATCH"
-        assert result["exercise_match"]["is_match"]    is False
+        assert result["status"] == "exercise_mismatch"
+        assert result["can_analyze"] is False
+        assert result["score"] == 0.0
+        assert result["risk_level"] == "MISMATCH"
+        assert result["exercise_match"]["is_match"] is False
 
     def test_reports_progress_via_callback(self):
         mock_callback = MagicMock()

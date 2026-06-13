@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from app.services.pose_detection import verify_video_duration
-
+from app.services.video_validation import verify_video_duration
+from app.exceptions import ServiceException
 
 def _make_cap(fps: float, total_frames: float):
     cap = MagicMock()
@@ -12,7 +12,7 @@ def _make_cap(fps: float, total_frames: float):
 
 class TestVerifyVideoDuration:
 
-    @patch("app.services.analysis_results.cv2.VideoCapture")
+    @patch("app.services.video_validation.cv2.VideoCapture")
     def test_duration_within_limit_returns_none(self, mock_cap_cls):
         mock_cap_cls.return_value = _make_cap(fps=30.0, total_frames=900)
 
@@ -20,7 +20,7 @@ class TestVerifyVideoDuration:
 
         assert result is None
 
-    @patch("app.services.analysis_results.cv2.VideoCapture")
+    @patch("app.services.video_validation.cv2.VideoCapture")
     def test_duration_exactly_at_limit_returns_none(self, mock_cap_cls):
         mock_cap_cls.return_value = _make_cap(fps=30.0, total_frames=1800)
 
@@ -28,10 +28,11 @@ class TestVerifyVideoDuration:
 
         assert result is None
 
-    @patch("app.services.analysis_results.cv2.VideoCapture")
-    def test_duration_exceeds_limit_returns_error_message(self, mock_cap_cls):
+    @patch("app.services.video_validation.cv2.VideoCapture")
+    def test_duration_exceeds_limit_raises_service_exception(self, mock_cap_cls):
         mock_cap_cls.return_value = _make_cap(fps=30.0, total_frames=2700)
 
-        result = verify_video_duration("exercise_vid.mp4")
+        with pytest.raises(ServiceException) as exc_info:
+            verify_video_duration("exercise_vid.mp4")
 
-        assert result == "Video exceeds 60 seconds."
+        assert "Video exceeds 60 seconds." in str(exc_info.value)
