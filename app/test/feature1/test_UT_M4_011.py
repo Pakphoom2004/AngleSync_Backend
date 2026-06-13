@@ -71,7 +71,7 @@ def _make_supabase_mock(
 
 class TestGetReferenceAnglesFromDb:
 
-    @patch("app.repository.reference_repository.supabase")
+    @patch("app.config.supabase_client.supabase")
     def test_returns_exercise_name_average_angles_and_angle_sequence(
         self, mock_supabase
     ):
@@ -85,7 +85,7 @@ class TestGetReferenceAnglesFromDb:
         assert isinstance(result["angle_sequence"], list)
         assert len(result["angle_sequence"]) == 2
 
-    @patch("app.repository.reference_repository.supabase")
+    @patch("app.config.supabase_client.supabase")
     def test_average_angles_correctly_calculated(
         self, mock_supabase
     ):
@@ -97,7 +97,7 @@ class TestGetReferenceAnglesFromDb:
         expected_left_hip = (163.9 + 164.3) / 2
         assert abs(result["average_angles"]["left_hip"] - expected_left_hip) < 1e-4
 
-    @patch("app.repository.reference_repository.supabase")
+    @patch("app.config.supabase_client.supabase")
     def test_raises_value_error_when_no_frames_found(
         self, mock_supabase
     ):
@@ -109,7 +109,7 @@ class TestGetReferenceAnglesFromDb:
 
         assert "No frames found for reference_video_id=999" in str(exc_info.value)
 
-    @patch("app.repository.reference_repository.supabase")
+    @patch("app.config.supabase_client.supabase")
     def test_raises_value_error_when_no_metrics_found(
         self, mock_supabase
     ):

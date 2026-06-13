@@ -1,6 +1,6 @@
 import pytest
 
-from app.services.pose_detection import verify_file_type
+from app.services.video_validation import verify_file_type
 from app.exceptions import ServiceException
 
 
