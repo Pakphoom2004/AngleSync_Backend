@@ -3,7 +3,7 @@ import numpy as np
 
 from app.exceptions import (
     KeypointNotDetectedException,
-    PoseModuleNotFoundError
+    pose_module_notFound_error
 )
 
 MODEL_PATH = "assets/yolo11m-pose.pt"
@@ -36,7 +36,7 @@ def _load_pose_dependencies():
     try:
         from ultralytics import YOLO
     except ImportError as error:
-        raise PoseModuleNotFoundError() from error
+        raise pose_module_notFound_error() from error
     return YOLO
 
 def _get_pose_model():
