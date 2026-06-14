@@ -5,6 +5,7 @@ from app.exceptions import (
     KeypointNotDetectedException,
     pose_module_notFound_error
 )
+from app.exceptions.Video_Quality_exception import VideoQualityException
 
 MODEL_PATH = "assets/yolo11m-pose.pt"
 
@@ -177,39 +178,69 @@ def detect_body_keypoints(file: str, progress_callback=None):
 
 EARLY_CHECK_FRAMES = 20  # detect แค่ 20 frames แรกเพื่อ validate
 
-def detect_sample_keypoints(file: str, sample_count: int = EARLY_CHECK_FRAMES):
-    """Detect keypoints จาก sample frames เพื่อ validate exercise เท่านั้น"""
+def detect_sample_keypoints(
+        file: str,
+        sample_count: int = EARLY_CHECK_FRAMES
+):
+    """Detect keypoints from sampled frames for exercise validation."""
+
     model = _get_pose_model()
+
     cap = cv2.VideoCapture(file)
+
     fps = cap.get(cv2.CAP_PROP_FPS) or 30
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+    total_frames = int(
+        cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0
+    )
 
     keypoints_per_frame = []
+
     frame_id = 0
-    step = max(1, total_frames // sample_count)  # กระจาย sample ตลอด video
+
+    step = max(
+        1,
+        total_frames // sample_count
+    )
 
     while True:
+
         ret, frame = cap.read()
+
         if not ret:
             break
+
         frame_id += 1
 
         if frame_id % step != 0:
             continue
 
-        results = model(frame, conf=CONF_THRES, verbose=False)
+        results = model(
+            frame,
+            conf=CONF_THRES,
+            verbose=False
+        )
 
         for result in results:
+
             if result.keypoints is None:
                 continue
+
             if result.keypoints.xyn is None:
                 continue
+
             if len(result.keypoints.xyn) == 0:
                 continue
 
-            xyn = result.keypoints.xyn[0].cpu().numpy()
+            xyn = (
+                result.keypoints.xyn[0]
+                .cpu()
+                .numpy()
+            )
+
             conf = (
-                result.keypoints.conf[0].cpu().numpy()
+                result.keypoints.conf[0]
+                .cpu()
+                .numpy()
                 if result.keypoints.conf is not None
                 else np.ones(len(xyn))
             )
@@ -219,11 +250,17 @@ def detect_sample_keypoints(file: str, sample_count: int = EARLY_CHECK_FRAMES):
 
             keypoints_per_frame.append({
                 "frame": frame_id,
-                "time": round(frame_id / fps, 2),
+                "time": round(
+                    frame_id / fps,
+                    2
+                ),
                 "yolo_keypoints": [
                     {
                         "id": i,
-                        "name": KP_NAME.get(i, "unknown"),
+                        "name": KP_NAME.get(
+                            i,
+                            "unknown"
+                        ),
                         "x": float(xyn[i][0]),
                         "y": float(xyn[i][1]),
                         "confidence": float(conf[i])
@@ -231,10 +268,15 @@ def detect_sample_keypoints(file: str, sample_count: int = EARLY_CHECK_FRAMES):
                     for i in range(len(xyn))
                 ]
             })
+
             break
 
         if len(keypoints_per_frame) >= sample_count:
             break
 
     cap.release()
+
+    if not keypoints_per_frame:
+        raise VideoQualityException()
+
     return keypoints_per_frame

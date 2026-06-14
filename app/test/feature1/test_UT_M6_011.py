@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 from unittest.mock import MagicMock, patch
 
+from app.exceptions.Video_Quality_exception import VideoQualityException
 from app.services.pose_detection import detect_sample_keypoints
 
 
@@ -90,14 +91,31 @@ class TestDetectSampleKeypoints:
 
     @patch("app.services.pose_detection._get_pose_model")
     @patch("app.services.pose_detection.cv2.VideoCapture")
-    def test_returns_empty_list_when_no_person_detected(
-        self, mock_cap_cls, mock_get_model
+    def test_raises_video_quality_exception_when_no_person_detected(
+            self,
+            mock_cap_cls,
+            mock_get_model
     ):
-        mock_cap_cls.return_value = _make_cap(frame_count=30)
+        mock_cap_cls.return_value = _make_cap(
+            frame_count=30
+        )
+
         empty_result = MagicMock()
         empty_result.keypoints = None
-        mock_get_model.return_value = MagicMock(return_value=[empty_result])
 
-        result = detect_sample_keypoints("frame_ai.mp4", sample_count=5)
+        mock_get_model.return_value = MagicMock(
+            return_value=[empty_result]
+        )
 
-        assert result == []
+        with pytest.raises(
+                VideoQualityException
+        ) as exc_info:
+            detect_sample_keypoints(
+                "frame_ai.mp4",
+                sample_count=5
+            )
+
+        assert (
+                str(exc_info.value)
+                == "Pose detection failed. Please ensure the video is clear, "
+        )
