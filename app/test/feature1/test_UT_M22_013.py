@@ -44,6 +44,20 @@ class TestGenerateAdvancedFeedback:
         assert feedback["practice_plan"]   != ""
 
     @patch("app.services.feedback_service._generate_with_zai")
+    def test_frame_path_does_not_replace_prompt_template(
+        self, mock_generate
+    ):
+        mock_generate.return_value = MOCK_RESPONSE
+
+        result = generate_advanced_feedback(
+            ANALYSIS_DATA,
+            "squat_frame_150.jpg"
+        )
+
+        assert "Required keys:" in result["prompt"]
+        assert "squat_frame_150.jpg" not in result["prompt"]
+
+    @patch("app.services.feedback_service._generate_with_zai")
     def test_raises_service_exception_when_api_fails(
         self, mock_generate
     ):

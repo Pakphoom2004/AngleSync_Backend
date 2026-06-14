@@ -7,7 +7,10 @@ from time import time
 
 
 from dotenv import load_dotenv
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
 
 from app.exceptions import ServiceException
 
@@ -37,6 +40,19 @@ FEEDBACK_KEYS = (
     "practice_plan"
 )
 
+FEEDBACK_WRAPPER_KEYS = (
+    "feedback",
+    "analysis",
+    "result",
+    "data"
+)
+
+MARKDOWN_HEADING_PREFIXES = (
+    "#",
+    "*",
+    "-"
+)
+
 DEFAULT_MODEL = os.getenv(
     "ZAI_MODEL",
 )
@@ -45,7 +61,96 @@ def build_feedback_prompt(analysis_data, prompt_template=PROMPT_TEMPLATE):
     return f"{prompt_template}\n\nAnalysis Data:\n{analysis_data}".strip()
 
 
+def _clean_markdown_line(line):
+    cleaned = line.strip()
+    cleaned = cleaned.lstrip("#").strip()
+    cleaned = cleaned.lstrip("*").strip()
+    cleaned = cleaned.lstrip("-").strip()
+
+    if ".  " in cleaned[:5]:
+        cleaned = cleaned.split(".  ", 1)[1].strip()
+
+    return cleaned.replace("**", "").strip()
+
+
+def _format_markdown_lines(lines):
+    return " ".join(
+        _clean_markdown_line(line)
+        for line in lines
+        if _clean_markdown_line(line)
+    ).strip()
+
+
+def _extract_markdown_section(lines, start_markers, end_markers=()):
+    selected = []
+    in_section = False
+
+    for line in lines:
+        normalized = _clean_markdown_line(line).lower()
+
+        if not in_section and any(marker in normalized for marker in start_markers):
+            in_section = True
+            selected.append(line)
+            continue
+
+        if in_section and end_markers and any(
+            marker in normalized for marker in end_markers
+        ):
+            break
+
+        if in_section:
+            selected.append(line)
+
+    return _format_markdown_lines(selected)
+
+
+def _parse_markdown_feedback(cleaned):
+    lines = [
+        line
+        for line in cleaned.splitlines()
+        if _clean_markdown_line(line)
+    ]
+
+    if not lines:
+        return None
+
+    risk_section = _extract_markdown_section(
+        lines,
+        ("overall risk assessment", "risk score", "injury risk"),
+        ("detailed posture analysis", "recommended correction")
+    )
+    detail_section = _extract_markdown_section(
+        lines,
+        ("detailed posture analysis",),
+        ("recommended correction",)
+    )
+    correction_section = _extract_markdown_section(
+        lines,
+        ("recommended correction", "recommended corrections", "correction")
+    )
+
+    readable_text = _format_markdown_lines(lines)
+
+    if not any((risk_section, detail_section, correction_section)):
+        return None
+
+    form_summary = detail_section or readable_text
+    injury_risk = risk_section or form_summary
+    corrective_cues = correction_section or form_summary
+    practice_plan = correction_section or corrective_cues
+
+    return {
+        "form_summary": form_summary,
+        "injury_risk": injury_risk,
+        "corrective_cues": corrective_cues,
+        "practice_plan": practice_plan
+    }
+
+
 def _generate_with_zai(prompt, model_name):
+    if OpenAI is None:
+        raise ServiceException("Missing openai package dependency.")
+
     api_key = os.getenv("ZAI_API_KEY")
     if not api_key:
         raise ServiceException("Missing ZAI_API_KEY in environment.")
@@ -100,6 +205,13 @@ def parse_feedback_response(
         parsed = None
 
     if isinstance(parsed, dict):
+        for wrapper_key in FEEDBACK_WRAPPER_KEYS:
+            nested = parsed.get(wrapper_key)
+            if isinstance(nested, dict):
+                parsed = nested
+                break
+
+    if isinstance(parsed, dict):
         for key in FEEDBACK_KEYS:
             value = parsed.get(key, "")
             feedback[key] = str(value or "").strip()
@@ -132,6 +244,11 @@ def parse_feedback_response(
             elif current_section:
                 feedback[current_section] += " " + line
 
+        if not all(feedback.get(key, "").strip() for key in FEEDBACK_KEYS):
+            markdown_feedback = _parse_markdown_feedback(cleaned)
+            if markdown_feedback is not None:
+                feedback.update(markdown_feedback)
+
     is_complete = all(
         feedback.get(key, "").strip()
         for key in FEEDBACK_KEYS
@@ -141,7 +258,7 @@ def parse_feedback_response(
 
 def generate_advanced_feedback(
         analysis_data: dict,
-        frame_path: str,
+        frame_path: str = None,
         prompt_template: str = PROMPT_TEMPLATE,
         model_name: str = DEFAULT_MODEL
 ):
@@ -153,7 +270,6 @@ def generate_advanced_feedback(
     try:
         response_text = _generate_with_zai(
             prompt,
-            frame_path,
             model_name
         )
         print(f"[DEBUG] response_text: {response_text}")
