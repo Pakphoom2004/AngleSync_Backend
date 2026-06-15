@@ -5,7 +5,6 @@ from app.exceptions import (
     KeypointNotDetectedException,
     pose_module_notFound_error
 )
-from app.exceptions.Video_Quality_exception import VideoQualityException
 
 MODEL_PATH = "assets/yolo11m-pose.pt"
 
@@ -50,7 +49,7 @@ def _get_pose_model():
     return _POSE_MODEL
 
 
-def _report_progress(progress_callback, percent, message):
+def _update_progress(progress_callback, percent, message):
     if progress_callback is None:
         return
 
@@ -60,11 +59,20 @@ def _report_progress(progress_callback, percent, message):
         "percent": percent
     })
 
+
+def _open_video_capture(file: str):
+    cap = cv2.VideoCapture(file)
+    orientation_auto = getattr(cv2, "CAP_PROP_ORIENTATION_AUTO", None)
+    if orientation_auto is not None:
+        cap.set(orientation_auto, 1)
+    return cap
+
+
 # Detect body keypoints from uploaded exercise video
 def detect_body_keypoints(file: str, progress_callback=None):
     model = _get_pose_model()
 
-    cap = cv2.VideoCapture(file)
+    cap = _open_video_capture(file)
     fps = (
             cap.get(cv2.CAP_PROP_FPS)
             or 30
@@ -94,7 +102,7 @@ def detect_body_keypoints(file: str, progress_callback=None):
             )
             if percent >= last_reported_percent + 5:
                 last_reported_percent = percent
-                _report_progress(
+                _update_progress(
                     progress_callback,
                     min(percent, 60),
                     "Detecting pose..."
@@ -164,7 +172,7 @@ def detect_body_keypoints(file: str, progress_callback=None):
 
     cap.release()
 
-    _report_progress(
+    _update_progress(
         progress_callback,
         60,
         "Pose detection completed."
@@ -186,7 +194,7 @@ def detect_sample_keypoints(
 
     model = _get_pose_model()
 
-    cap = cv2.VideoCapture(file)
+    cap = _open_video_capture(file)
 
     fps = cap.get(cv2.CAP_PROP_FPS) or 30
     total_frames = int(
@@ -277,6 +285,6 @@ def detect_sample_keypoints(
     cap.release()
 
     if not keypoints_per_frame:
-        raise VideoQualityException()
+        raise KeypointNotDetectedException()
 
     return keypoints_per_frame

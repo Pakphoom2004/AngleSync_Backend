@@ -5,9 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/exceptions/Video_Quality_exception.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/exceptions/Video_Quality_exception.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/feedback_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/feedback_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/graph_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/graph_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/pose_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/pose_detection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M20_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M20_013.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M22_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M22_013.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M3_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M3_011.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M6_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M6_011.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -218,5 +223,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/app/exceptions/keypoint_not_detected_exception.py</url>
+          <line>7</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

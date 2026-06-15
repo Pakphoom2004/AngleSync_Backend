@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from unittest.mock import MagicMock, patch
 
-from app.exceptions.Video_Quality_exception import VideoQualityException
+from app.exceptions.keypoint_not_detected_exception import KeypointNotDetectedException
 from app.services.pose_detection import detect_sample_keypoints
 
 
@@ -108,7 +108,7 @@ class TestDetectSampleKeypoints:
         )
 
         with pytest.raises(
-                VideoQualityException
+                KeypointNotDetectedException
         ) as exc_info:
             detect_sample_keypoints(
                 "frame_ai.mp4",
@@ -117,5 +117,5 @@ class TestDetectSampleKeypoints:
 
         assert (
                 str(exc_info.value)
-                == "Pose detection failed. Please ensure the video is clear, "
+                == "Detection failed. Please ensure that the person is visible."
         )

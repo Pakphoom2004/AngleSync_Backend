@@ -3,7 +3,6 @@ import json
 import mimetypes
 import os
 import time
-from time import time
 
 
 from dotenv import load_dotenv
@@ -147,7 +146,7 @@ def _parse_markdown_feedback(cleaned):
     }
 
 
-def _generate_with_zai(prompt, model_name):
+def _generate_with_ai(prompt, model_name):
     if OpenAI is None:
         raise ServiceException("Missing openai package dependency.")
 
@@ -175,11 +174,20 @@ def _generate_with_zai(prompt, model_name):
                 return response_text.strip()
 
         except Exception as error:
-            if "429" in str(error) and attempt < 2:
-                wait = 5 * (attempt + 1)  # 5s, 10s
-                print(f"[DEBUG] Rate limited, retrying in {wait}s...")
-                time.sleep(wait)
-                continue
+            is_rate_limited = (
+                getattr(error, "status_code", None) == 429
+                or "429" in str(error)
+            )
+            if is_rate_limited:
+                if attempt < 2:
+                    wait = 5 * (attempt + 1)  # 5s, 10s
+                    print(f"[DEBUG] Rate limited, retrying in {wait}s...")
+                    time.sleep(wait)
+                    continue
+                raise ServiceException(
+                    "Z.AI rate limit exceeded after 3 attempts. "
+                    "Please try again later or check the API quota."
+                ) from error
             raise ServiceException(str(error)) from error
 
     raise ServiceException("Z.AI rate limit exceeded after retries.")
@@ -268,7 +276,7 @@ def generate_advanced_feedback(
     )
 
     try:
-        response_text = _generate_with_zai(
+        response_text = _generate_with_ai(
             prompt,
             model_name
         )

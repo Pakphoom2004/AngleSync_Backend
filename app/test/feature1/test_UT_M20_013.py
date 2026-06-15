@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from app.services.feedback_service import _generate_with_zai
+from app.services.feedback_service import _generate_with_ai
 from app.exceptions import ServiceException
 
 
@@ -25,7 +25,7 @@ class TestGenerateWithZai:
             mock_response
         )
 
-        result = _generate_with_zai(
+        result = _generate_with_ai(
             "You are an expert fitness coach.",
             "gemini-2.0-flash"
         )
@@ -44,7 +44,7 @@ class TestGenerateWithZai:
         )
 
         with pytest.raises(ServiceException):
-            _generate_with_zai(
+            _generate_with_ai(
                 "You are an expert fitness coach.",
                 "gemini-2.0-flash"
             )

@@ -14,6 +14,14 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
+def _open_video_capture(file: str):
+    cap = cv2.VideoCapture(file)
+    orientation_auto = getattr(cv2, "CAP_PROP_ORIENTATION_AUTO", None)
+    if orientation_auto is not None:
+        cap.set(orientation_auto, 1)
+    return cap
+
+
 def generate_risk_graph(
         risk_scores: tuple,
         highest_risk_frame_index: int,
@@ -112,7 +120,7 @@ def save_highest_risk_frame(
         exist_ok=True
     )
 
-    cap = cv2.VideoCapture(video_path)
+    cap = _open_video_capture(video_path)
     cap.set(
         cv2.CAP_PROP_POS_FRAMES,
         max(frame_number - 1, 0)
