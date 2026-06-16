@@ -1,50 +1,42 @@
 import pytest
-from unittest.mock import MagicMock, patch
 
-from app.services.feedback_service import _generate_with_ai
-from app.exceptions import ServiceException
+from app.services.motion_analysis import calculate_sequence_risk_scores
 
 
-class TestGenerateWithZai:
+ANGLE_SEQUENCE = [
+    {"left_elbow": 169.1, "right_elbow": 162.7, "left_shoulder": 0.9,  "right_shoulder": 2.1,  "left_knee": 173.4, "right_knee": 162.2, "left_hip": 163.8, "right_hip": 173.9},
+    {"left_elbow": 169.3, "right_elbow": 163.4, "left_shoulder": 0.5,  "right_shoulder": 1.6,  "left_knee": 173.7, "right_knee": 162.4, "left_hip": 164.3, "right_hip": 173.4},
+    {"left_elbow": 168.9, "right_elbow": 162.1, "left_shoulder": 1.1,  "right_shoulder": 2.5,  "left_knee": 172.9, "right_knee": 161.8, "left_hip": 163.2, "right_hip": 174.1},
+]
 
-    @patch("app.services.feedback_service.OpenAI")
-    @patch("app.services.feedback_service.os.getenv")
-    def test_returns_response_text_when_api_succeeds(
-        self, mock_getenv, mock_openai_cls
-    ):
-        mock_getenv.return_value = "fake-api-key"
 
-        mock_response = MagicMock()
-        mock_response.choices[0].message.content = (
-            '{"form_summary": "Good form.", '
-            '"injury_risk": "Low.", '
-            '"corrective_cues": "Keep knees over toes.", '
-            '"practice_plan": "Practice daily."}'
-        )
-        mock_openai_cls.return_value.chat.completions.create.return_value = (
-            mock_response
+class TestCalculateSequenceRiskScores:
+
+    def test_returns_list_with_length_equal_to_detected_sequence(self):
+        result = calculate_sequence_risk_scores(
+            ANGLE_SEQUENCE,
+            ANGLE_SEQUENCE
         )
 
-        result = _generate_with_ai(
-            "You are an expert fitness coach.",
-            "gemini-2.0-flash"
+        assert isinstance(result, list)
+        assert len(result) == len(ANGLE_SEQUENCE)
+
+    def test_all_risk_scores_within_valid_range(self):
+        result = calculate_sequence_risk_scores(
+            ANGLE_SEQUENCE,
+            ANGLE_SEQUENCE
         )
 
-        assert isinstance(result, str)
-        assert len(result) > 0
+        for score in result:
+            assert isinstance(score, float)
+            assert 0.0 <= score <= 100.0
 
-    @patch("app.services.feedback_service.OpenAI")
-    @patch("app.services.feedback_service.os.getenv")
-    def test_raises_service_exception_when_api_fails(
-        self, mock_getenv, mock_openai_cls
-    ):
-        mock_getenv.return_value = "fake-api-key"
-        mock_openai_cls.return_value.chat.completions.create.side_effect = (
-            Exception("API error")
+    def test_identical_sequences_returns_all_zero_risk_scores(self):
+        result = calculate_sequence_risk_scores(
+            ANGLE_SEQUENCE,
+            ANGLE_SEQUENCE
         )
 
-        with pytest.raises(ServiceException):
-            _generate_with_ai(
-                "You are an expert fitness coach.",
-                "gemini-2.0-flash"
-            )
+        for score in result:
+            assert score < 1e-4, \
+                f"Expected score near 0.0, got {score}"

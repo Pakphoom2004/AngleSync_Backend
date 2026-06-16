@@ -1,82 +1,38 @@
 import pytest
 
-from app.services.feedback_service import parse_feedback_response
+from app.services.motion_analysis import calculate_risk_score
 
 
-class TestParseFeedbackResponse:
+DETECT_ANGLE_01 = {
+    "left_elbow": 160, "right_elbow": 160,
+    "left_shoulder": 40, "right_shoulder": 40,
+    "left_knee": 90, "right_knee": 90,
+    "left_hip": 100, "right_hip": 100
+}
 
-    def test_parses_valid_json_response(self):
-        text = (
-            '{"form_summary": "Good squat depth.", '
-            '"injury_risk": "Low risk.", '
-            '"corrective_cues": "Keep knees over toes.", '
-            '"practice_plan": "Practice 3 sets daily."}'
-        )
+DETECT_ANGLE_02 = {
+    "left_elbow": 169.1, "right_elbow": 162.7,
+    "left_shoulder": 0.9, "right_shoulder": 2.1,
+    "left_knee": 173.4, "right_knee": 162.2,
+    "left_hip": 163.8, "right_hip": 173.9
+}
 
-        feedback, is_complete = parse_feedback_response(text)
+STANDARD_ANGLE = {
+    "left_elbow": 160, "right_elbow": 160,
+    "left_shoulder": 40, "right_shoulder": 40,
+    "left_knee": 90, "right_knee": 90,
+    "left_hip": 100, "right_hip": 100
+}
 
-        assert feedback["form_summary"]    == "Good squat depth."
-        assert feedback["injury_risk"]     == "Low risk."
-        assert feedback["corrective_cues"] == "Keep knees over toes."
-        assert feedback["practice_plan"]   == "Practice 3 sets daily."
-        assert is_complete is True
 
-    def test_parses_feedback_wrapped_json_response(self):
-        text = (
-            '{"feedback": {'
-            '"form_summary": "Good squat depth.", '
-            '"injury_risk": "Low risk.", '
-            '"corrective_cues": "Keep knees over toes.", '
-            '"practice_plan": "Practice 3 sets daily."'
-            '}}'
-        )
+class TestCalculateRiskScore:
 
-        feedback, is_complete = parse_feedback_response(text)
+    def test_exact_match_returns_0(self):
+        result = calculate_risk_score(DETECT_ANGLE_01, STANDARD_ANGLE)
 
-        assert feedback["form_summary"]    == "Good squat depth."
-        assert feedback["injury_risk"]     == "Low risk."
-        assert feedback["corrective_cues"] == "Keep knees over toes."
-        assert feedback["practice_plan"]   == "Practice 3 sets daily."
-        assert is_complete is True
+        assert result == 0.0
 
-    def test_parses_markdown_model_response(self):
-        text = """
-Based on the analysis data provided for frame 162, here is the detailed assessment.
+    def test_deviation_returns_correct_risk_score(self):
+        result = calculate_risk_score(DETECT_ANGLE_02, STANDARD_ANGLE)
 
-### **Overall Risk Assessment: HIGH RISK**
-**Risk Score:** 43.43
-
-The posture detected indicates a significant deviation from neutral body mechanics.
-
-### **Detailed Posture Analysis**
-
-**1. Lateral Flexion (Leaning)**
-*   **The Issue:** There is a distinct curve in the spine.
-*   **Impact:** This lateral twist places strain on the spine.
-
-### **Recommended Correction**
-1.  **Level the Shoulders:** Bring the right shoulder down.
-2.  **Reduce Elbow Flexion:** Straighten the right elbow slightly.
-3.  **Center the Spine:** Rotate the torso back to neutral.
-"""
-
-        feedback, is_complete = parse_feedback_response(text)
-
-        assert "Detailed Posture Analysis" in feedback["form_summary"]
-        assert "HIGH RISK" in feedback["injury_risk"]
-        assert "Level the Shoulders" in feedback["corrective_cues"]
-        assert "Center the Spine" in feedback["practice_plan"]
-        assert is_complete is True
-
-    def test_is_complete_false_when_field_is_empty(self):
-        text = (
-            '{"form_summary": "Good squat depth.", '
-            '"injury_risk": "", '
-            '"corrective_cues": "Keep knees over toes.", '
-            '"practice_plan": "Practice 3 sets daily."}'
-        )
-
-        feedback, is_complete = parse_feedback_response(text)
-
-        assert feedback["injury_risk"] == ""
-        assert is_complete is False
+        assert abs(result - 47.7625) < 1e-4
