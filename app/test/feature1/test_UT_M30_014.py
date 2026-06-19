@@ -1,7 +1,10 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from app.services.analysis_results import process_video_analysis
+from app.services.analysis_results import (
+    _build_graph_samples,
+    process_video_analysis
+)
 from app.exceptions import ServiceException, ExerciseMismatchException
 
 
@@ -107,6 +110,8 @@ def _patch_all(
 class TestProcessVideoAnalysis:
 
     def test_returns_completed_status_when_video_matches(self):
+        mock_feedback = MagicMock(return_value=MOCK_FEEDBACK)
+
         with patch("app.services.analysis_results.verify_file_type"), \
                 patch("app.services.analysis_results.verify_video_duration", return_value=None), \
                 patch("app.services.analysis_results.get_reference_angles_from_db", return_value=REFERENCE_DATA), \
@@ -118,7 +123,7 @@ class TestProcessVideoAnalysis:
                 patch("app.services.analysis_results.generate_risk_graph", return_value=MagicMock()), \
                 patch("app.services.analysis_results.save_highest_risk_frame",
                       return_value="data/outputs/highest_risk_frame.jpg"), \
-                patch("app.services.analysis_results.generate_advanced_feedback", return_value=MOCK_FEEDBACK):
+                patch("app.services.analysis_results.generate_advanced_feedback", mock_feedback):
             result = process_video_analysis("exercise_vid.mp4", 4, None)
 
         assert result["status"] == "completed"
@@ -130,6 +135,32 @@ class TestProcessVideoAnalysis:
         assert "selected_frame" in result
         assert "graph_data" in result
         assert "feedback" in result
+        mock_feedback.assert_called_once_with(MOCK_ANALYSIS_RESULT["angles_per_frame"][2])
+
+    def test_uses_base_url_and_saved_frame_filename_for_highest_risk_image_url(self):
+        with patch("app.services.analysis_results.verify_file_type"), \
+                patch("app.services.analysis_results.verify_video_duration", return_value=None), \
+                patch("app.services.analysis_results.get_reference_angles_from_db", return_value=REFERENCE_DATA), \
+                patch("app.services.analysis_results.detect_sample_keypoints", return_value=KEYPOINTS_PER_FRAME), \
+                patch("app.services.analysis_results.extract_joint_angles", return_value={"left_knee": 173.4}), \
+                patch("app.services.analysis_results.validate_exercise_match"), \
+                patch("app.services.analysis_results.detect_body_keypoints", return_value=KEYPOINTS_PER_FRAME), \
+                patch("app.services.analysis_results.analyze_motion", return_value=MOCK_ANALYSIS_RESULT), \
+                patch("app.services.analysis_results.generate_risk_graph", return_value=MagicMock()), \
+                patch("app.services.analysis_results.save_highest_risk_frame",
+                      return_value="data/outputs/highest_risk_frame_abc.jpg"), \
+                patch("app.services.analysis_results.generate_advanced_feedback", return_value=MOCK_FEEDBACK):
+            result = process_video_analysis(
+                "exercise_vid.mp4",
+                4,
+                None,
+                base_url="http://testserver"
+            )
+
+        assert (
+            result["graph_data"]["highest_risk_image_url"]
+            == "http://testserver/outputs/highest_risk_frame_abc.jpg"
+        )
 
     def test_returns_mismatch_status_when_exercise_does_not_match(self):
         mismatch_error = ExerciseMismatchException(
@@ -201,3 +232,29 @@ class TestProcessVideoAnalysis:
 
         assert result["status"]                    == "completed"
         assert result["feedback"]["form_summary"]  == "AI feedback unavailable."
+
+
+class TestBuildGraphSamples:
+
+    def test_limits_graph_samples_and_keeps_highest_risk_frame(self):
+        risk_scores = tuple(float(index) for index in range(382))
+        angles_per_frame = [
+            {
+                "frame": index + 1,
+                "time": round(index / 15, 2),
+                "risk_score": float(index)
+            }
+            for index in range(382)
+        ]
+
+        graph_scores, graph_frames, graph_peak_index = _build_graph_samples(
+            risk_scores,
+            angles_per_frame,
+            highest_risk_frame_index=200
+        )
+
+        assert len(graph_scores) <= 180
+        assert len(graph_frames) == len(graph_scores)
+        assert graph_scores[graph_peak_index] == 200.0
+        assert graph_frames[graph_peak_index]["frame"] == 201
+        assert graph_scores[-1] < risk_scores[-1]

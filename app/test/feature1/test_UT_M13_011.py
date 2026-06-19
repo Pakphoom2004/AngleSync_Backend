@@ -126,7 +126,7 @@ class TestDetectSampleKeypoints:
 
         assert (
                 str(exc_info.value)
-                == "Keypoint not found. Please ensure that the person is visible."
+                == "Detection failed. Please ensure that the person is visible."
         )
 
     @patch("app.services.pose_detection._get_pose_model")

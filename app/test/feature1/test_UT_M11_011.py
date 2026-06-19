@@ -1,4 +1,5 @@
 import pytest
+from types import ModuleType
 from unittest.mock import MagicMock, patch
 
 from app.repository.reference_repository import get_reference_angles_from_db
@@ -69,54 +70,62 @@ def _make_supabase_mock(
     return supabase
 
 
+def _patch_supabase_module(supabase):
+    module = ModuleType("app.config.supabase_client")
+    module.supabase = supabase
+
+    return patch.dict(
+        "sys.modules",
+        {
+            "app.config.supabase_client": module
+        }
+    )
+
+
 class TestGetReferenceAnglesFromDb:
 
-    @patch("app.config.supabase_client.supabase")
     def test_returns_exercise_name_average_angles_and_angle_sequence(
-        self, mock_supabase
+        self
     ):
-        mock_supabase.table.side_effect = \
-            _make_supabase_mock().table.side_effect
+        supabase = _make_supabase_mock()
 
-        result = get_reference_angles_from_db(1)
+        with _patch_supabase_module(supabase):
+            result = get_reference_angles_from_db(1)
 
         assert result["exercise_name"] == "Squat_men"
         assert isinstance(result["average_angles"], dict)
         assert isinstance(result["angle_sequence"], list)
         assert len(result["angle_sequence"]) == 2
 
-    @patch("app.config.supabase_client.supabase")
     def test_average_angles_correctly_calculated(
-        self, mock_supabase
+        self
     ):
-        mock_supabase.table.side_effect = \
-            _make_supabase_mock().table.side_effect
+        supabase = _make_supabase_mock()
 
-        result = get_reference_angles_from_db(1)
+        with _patch_supabase_module(supabase):
+            result = get_reference_angles_from_db(1)
 
         expected_left_hip = (163.9 + 164.3) / 2
         assert abs(result["average_angles"]["left_hip"] - expected_left_hip) < 1e-4
 
-    @patch("app.config.supabase_client.supabase")
     def test_raises_value_error_when_no_frames_found(
-        self, mock_supabase
+        self
     ):
-        mock_supabase.table.side_effect = \
-            _make_supabase_mock(frames_data=[]).table.side_effect
+        supabase = _make_supabase_mock(frames_data=[])
 
-        with pytest.raises(ValueError) as exc_info:
-            get_reference_angles_from_db(999)
+        with _patch_supabase_module(supabase):
+            with pytest.raises(ValueError) as exc_info:
+                get_reference_angles_from_db(999)
 
         assert "No frames found for reference_video_id=999" in str(exc_info.value)
 
-    @patch("app.config.supabase_client.supabase")
     def test_raises_value_error_when_no_metrics_found(
-        self, mock_supabase
+        self
     ):
-        mock_supabase.table.side_effect = \
-            _make_supabase_mock(metrics_data=[]).table.side_effect
+        supabase = _make_supabase_mock(metrics_data=[])
 
-        with pytest.raises(ValueError) as exc_info:
-            get_reference_angles_from_db(1)
+        with _patch_supabase_module(supabase):
+            with pytest.raises(ValueError) as exc_info:
+                get_reference_angles_from_db(1)
 
         assert "No metrics found for frame_ids=" in str(exc_info.value)

@@ -224,8 +224,7 @@ def process_video_analysis(
 
     try:
         feedback_result = generate_advanced_feedback(
-            highest_frame_data,
-            frame_path
+            highest_frame_data
         )
         print(f"[DEBUG] feedback_result: {feedback_result}")
         feedback = feedback_result["feedback"]

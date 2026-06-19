@@ -27,7 +27,7 @@ class TestGenerateWithZai:
 
         result = _generate_with_ai(
             "You are an expert fitness coach.",
-            "gemini-2.0-flash"
+            "glm-4.7-flash"
         )
 
         assert isinstance(result, str)
@@ -46,5 +46,5 @@ class TestGenerateWithZai:
         with pytest.raises(ServiceException):
             _generate_with_ai(
                 "You are an expert fitness coach.",
-                "gemini-2.0-flash"
+                "glm-4.7-flash"
             )

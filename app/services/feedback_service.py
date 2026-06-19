@@ -266,7 +266,6 @@ def parse_feedback_response(
 
 def generate_advanced_feedback(
         analysis_data: dict,
-        frame_path: str = None,
         prompt_template: str = PROMPT_TEMPLATE,
         model_name: str = DEFAULT_MODEL
 ):
