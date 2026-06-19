@@ -5,35 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M25_013.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M26_013.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M27_013.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M28_013.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M29_013.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M10_012.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M17_012.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M11_013.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M12_013.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M13_013.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M14_013.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M15_013.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M16_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M23_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M17_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M24_013.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/exceptions/keypoint_not_detected_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/exceptions/keypoint_not_detected_exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/analysis_results.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/analysis_results.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/graph_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/graph_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/motion_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/motion_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/pose_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/pose_detection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M13_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M13_011.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M18_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M18_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M19_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M19_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M1_008.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M8_008.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M20_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M20_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M21_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M21_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M22_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M22_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M23_014.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M30_014.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M2_009.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M9_009.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M3_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M10_011.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M4_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M11_011.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M5_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M12_011.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M6_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M13_011.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M7_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M14_011.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M8_011.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M15_011.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M9_012.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M16_012.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M23_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M23_013.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

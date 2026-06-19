@@ -9,8 +9,24 @@ from app.exceptions import (
 MODEL_PATH = "assets/yolo11m-pose.pt"
 
 CONF_THRES = 0.3
-KP_CONF_THRES = 0.15
+KP_CONF_THRES = 0.35
+MIN_FRAME_SHARPNESS = 30.0
 _POSE_MODEL = None
+
+REQUIRED_KEYPOINT_NAMES = {
+    "left_shoulder",
+    "right_shoulder",
+    "left_elbow",
+    "right_elbow",
+    "left_wrist",
+    "right_wrist",
+    "left_hip",
+    "right_hip",
+    "left_knee",
+    "right_knee",
+    "left_ankle",
+    "right_ankle",
+}
 
 KP_NAME = {
     0: "nose",
@@ -68,6 +84,32 @@ def _open_video_capture(file: str):
     return cap
 
 
+def _has_reliable_keypoints(conf):
+    if len(conf) == 0 or np.mean(conf) < KP_CONF_THRES:
+        return False
+
+    required_confidences = [
+        conf[index]
+        for index, name in KP_NAME.items()
+        if name in REQUIRED_KEYPOINT_NAMES and index < len(conf)
+    ]
+
+    if len(required_confidences) < len(REQUIRED_KEYPOINT_NAMES):
+        return False
+
+    return min(required_confidences) >= KP_CONF_THRES
+
+
+def _is_frame_sharp(frame):
+    if frame is None or frame.size == 0:
+        return False
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    sharpness = cv2.Laplacian(gray, cv2.CV_64F).var()
+
+    return sharpness >= MIN_FRAME_SHARPNESS
+
+
 # Detect body keypoints from uploaded exercise video
 def detect_body_keypoints(file: str, progress_callback=None):
     model = _get_pose_model()
@@ -93,6 +135,9 @@ def detect_body_keypoints(file: str, progress_callback=None):
         frame_id += 1
 
         if frame_id % FRAME_SKIP != 0:
+            continue
+
+        if not _is_frame_sharp(frame):
             continue
 
         if total_frames > 0:
@@ -139,7 +184,7 @@ def detect_body_keypoints(file: str, progress_callback=None):
                 )
             else:
                 conf = np.ones(len(xyn))
-            if np.mean(conf) < KP_CONF_THRES:
+            if not _has_reliable_keypoints(conf):
                 continue
             frame_data = {
                 "frame": frame_id,
@@ -222,6 +267,9 @@ def detect_sample_keypoints(
         if frame_id % step != 0:
             continue
 
+        if not _is_frame_sharp(frame):
+            continue
+
         results = model(
             frame,
             conf=CONF_THRES,
@@ -253,7 +301,7 @@ def detect_sample_keypoints(
                 else np.ones(len(xyn))
             )
 
-            if np.mean(conf) < KP_CONF_THRES:
+            if not _has_reliable_keypoints(conf):
                 continue
 
             keypoints_per_frame.append({

@@ -727,8 +727,16 @@ def analyze_motion(
     for index, risk_score in enumerate(risk_scores):
         angles_per_frame[index]["risk_score"] = risk_score
 
+    peak_search_count = int(
+        np.ceil(len(risk_scores) * 0.95)
+    )
+    peak_search_count = max(
+        1,
+        peak_search_count
+    )
+
     highest_risk_frame_index = int(
-        np.argmax(risk_scores)
+        np.argmax(risk_scores[:peak_search_count])
     )
 
     average_risk = np.mean(

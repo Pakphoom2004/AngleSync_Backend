@@ -27,9 +27,17 @@ KP01 = [
 ]
 
 
-def _make_yolo_result():
+def _make_yolo_result(confidence_override=None):
     xyn_data  = np.array([[kp["x"], kp["y"]]  for kp in KP01], dtype=np.float32)
-    conf_data = np.array([kp["confidence"]     for kp in KP01], dtype=np.float32)
+    conf_data = np.array(
+        [
+            confidence_override
+            if confidence_override is not None
+            else kp["confidence"]
+            for kp in KP01
+        ],
+        dtype=np.float32
+    )
 
     xyn_tensor = MagicMock()
     xyn_tensor.cpu.return_value.numpy.return_value = xyn_data
@@ -48,6 +56,7 @@ def _make_yolo_result():
 
 def _make_cap(frame_count: int, fps: float = 30.0):
     frame = np.zeros((480, 640, 3), dtype=np.uint8)
+    frame[:, 320:] = 255
     reads = [(True, frame)] * frame_count + [(False, None)]
 
     cap = MagicMock()
@@ -117,5 +126,39 @@ class TestDetectSampleKeypoints:
 
         assert (
                 str(exc_info.value)
-                == "Detection failed. Please ensure that the person is visible."
+                == "Keypoint not found. Please ensure that the person is visible."
         )
+
+    @patch("app.services.pose_detection._get_pose_model")
+    @patch("app.services.pose_detection.cv2.VideoCapture")
+    def test_raises_keypoint_not_detected_when_keypoint_confidence_is_low(
+            self,
+            mock_cap_cls,
+            mock_get_model
+    ):
+        mock_cap_cls.return_value = _make_cap(frame_count=30)
+        mock_get_model.return_value = MagicMock(
+            return_value=[_make_yolo_result(confidence_override=0.2)]
+        )
+
+        with pytest.raises(KeypointNotDetectedException):
+            detect_sample_keypoints("blurred_video.mp4", sample_count=5)
+
+    @patch("app.services.pose_detection._get_pose_model")
+    @patch("app.services.pose_detection.cv2.VideoCapture")
+    def test_raises_keypoint_not_detected_when_frames_are_blurry(
+            self,
+            mock_cap_cls,
+            mock_get_model
+    ):
+        blurry_frame = np.full((480, 640, 3), 128, dtype=np.uint8)
+        cap = MagicMock()
+        cap.get.side_effect = lambda prop: 30.0 if prop == 5 else 30.0
+        cap.read.side_effect = [(True, blurry_frame)] * 30 + [(False, None)]
+        mock_cap_cls.return_value = cap
+        mock_get_model.return_value = MagicMock(
+            return_value=[_make_yolo_result()]
+        )
+
+        with pytest.raises(KeypointNotDetectedException):
+            detect_sample_keypoints("blurred_video.mp4", sample_count=5)

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 # Generate risk graph from frame-by-frame risk scores
 import io
 import os
+import uuid
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -116,21 +117,52 @@ def save_highest_risk_frame(
 ):
 
     os.makedirs(
-        "outputs",
+        "data/outputs",
         exist_ok=True
     )
 
     cap = _open_video_capture(video_path)
+
+    try:
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+    except (TypeError, ValueError):
+        total_frames = 0
+
+    target_frame = max(int(frame_number), 1)
+    if total_frames > 0:
+        target_frame = min(target_frame, total_frames)
+
     cap.set(
         cv2.CAP_PROP_POS_FRAMES,
-        max(frame_number - 1, 0)
+        target_frame - 1
     )
 
     success, frame = cap.read()
 
     if not success:
+        cap.release()
+        cap = _open_video_capture(video_path)
+        last_frame = None
+
+        for current_frame in range(1, target_frame + 1):
+            read_success, candidate_frame = cap.read()
+            if not read_success:
+                break
+            last_frame = candidate_frame
+            if current_frame == target_frame:
+                success = True
+                frame = candidate_frame
+                break
+
+        if not success and last_frame is not None:
+            success = True
+            frame = last_frame
+
+    if not success:
+        cap.release()
         raise Exception(
-            "Failed to extract frame."
+            f"Failed to extract frame. Requested frame={frame_number}, "
+            f"target frame={target_frame}, total frames={total_frames}."
         )
     if keypoints:
         frame = draw_skeleton_on_frame(
@@ -138,7 +170,10 @@ def save_highest_risk_frame(
             keypoints
         )
 
-    risk_frame = "data/outputs/highest_risk_frame.jpg"
+    risk_frame = (
+        "data/outputs/"
+        f"highest_risk_frame_{uuid.uuid4().hex}.jpg"
+    )
 
     cv2.imwrite(
         risk_frame,

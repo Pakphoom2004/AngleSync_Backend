@@ -44,7 +44,8 @@ class TestSaveHighestRiskFrame:
 
         result = save_highest_risk_frame("exercise_vid.mp4", 150, None)
 
-        assert result == "data/outputs/highest_risk_frame.jpg"
+        assert result.startswith("data/outputs/highest_risk_frame_")
+        assert result.endswith(".jpg")
 
     @patch("app.services.graph_service.draw_skeleton_on_frame")
     @patch("app.services.graph_service.cv2.imwrite")
@@ -59,7 +60,8 @@ class TestSaveHighestRiskFrame:
         result = save_highest_risk_frame("exercise_vid.mp4", 150, KP01)
 
         mock_draw.assert_called_once()
-        assert result == "data/outputs/highest_risk_frame.jpg"
+        assert result.startswith("data/outputs/highest_risk_frame_")
+        assert result.endswith(".jpg")
 
     @patch("app.services.graph_service.cv2.VideoCapture")
     def test_raises_exception_when_frame_cannot_be_extracted(

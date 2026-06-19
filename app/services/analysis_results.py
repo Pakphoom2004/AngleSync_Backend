@@ -1,5 +1,7 @@
 import io
 import base64
+import math
+import os
 
 from app.services.motion_analysis import (
     analyze_motion,
@@ -32,6 +34,55 @@ from app.services.video_validation import (
     verify_file_type,
     verify_video_duration
 )
+
+GRAPH_VISIBLE_RATIO = 0.95
+MAX_GRAPH_SAMPLES = 180
+
+
+def _build_graph_samples(
+        risk_scores,
+        angles_per_frame,
+        highest_risk_frame_index
+):
+    visible_count = max(
+        1,
+        int(math.ceil(len(risk_scores) * GRAPH_VISIBLE_RATIO))
+    )
+
+    if visible_count <= MAX_GRAPH_SAMPLES:
+        graph_indices = list(range(visible_count))
+    else:
+        graph_indices = sorted({
+            round(index * (visible_count - 1) / (MAX_GRAPH_SAMPLES - 1))
+            for index in range(MAX_GRAPH_SAMPLES)
+        })
+
+    if (
+        highest_risk_frame_index < visible_count
+        and highest_risk_frame_index not in graph_indices
+    ):
+        graph_indices.append(highest_risk_frame_index)
+        graph_indices.sort()
+
+        while len(graph_indices) > MAX_GRAPH_SAMPLES:
+            remove_index = min(
+                (
+                    index
+                    for index in graph_indices
+                    if index != highest_risk_frame_index
+                ),
+                key=lambda index: abs(index - highest_risk_frame_index)
+            )
+            graph_indices.remove(remove_index)
+
+    graph_peak_index = graph_indices.index(highest_risk_frame_index)
+
+    return (
+        [risk_scores[index] for index in graph_indices],
+        [angles_per_frame[index] for index in graph_indices],
+        graph_peak_index
+    )
+
 
 def process_video_analysis(
         video_path: str,
@@ -137,13 +188,22 @@ def process_video_analysis(
     highest_risk_frame_index = analysis_result["highest_risk_frame_index"]
     angles_per_frame = analysis_result["angles_per_frame"]
     highest_frame_data = angles_per_frame[highest_risk_frame_index]
+    (
+        graph_risk_scores,
+        graph_angles_per_frame,
+        graph_peak_index
+    ) = _build_graph_samples(
+        risk_scores,
+        angles_per_frame,
+        highest_risk_frame_index
+    )
 
     report_progress(82, "generating_graph", "Generating risk graph...")
 
     graph_image = generate_risk_graph(
-        risk_scores,
-        highest_risk_frame_index,
-        frame_times=[frame["time"] for frame in angles_per_frame]
+        graph_risk_scores,
+        graph_peak_index,
+        frame_times=[frame["time"] for frame in graph_angles_per_frame]
     )
 
     # แปลง PIL Image เป็น base64
@@ -155,6 +215,9 @@ def process_video_analysis(
         video_path,
         highest_frame_data["frame"],
         highest_frame_data.get("keypoints")
+    )
+    highest_risk_image_url = (
+        f"{base_url}/outputs/{os.path.basename(frame_path)}"
     )
 
     report_progress(90, "generating_feedback", "Generating feedback...")
@@ -208,10 +271,10 @@ def process_video_analysis(
         },
         "graph_data": {
             "graph_image": f"data:image/png;base64,{graph_base64}",
-            "risk_scores": [round(float(s), 2) for s in risk_scores],
-            "frame_times": [round(float(f["time"]), 2) for f in angles_per_frame],
-            "highest_risk_frame_index": highest_risk_frame_index,
-            "highest_risk_image_url": f"{base_url}/outputs/highest_risk_frame.jpg",
+            "risk_scores": [round(float(s), 2) for s in graph_risk_scores],
+            "frame_times": [round(float(f["time"]), 2) for f in graph_angles_per_frame],
+            "highest_risk_frame_index": graph_peak_index,
+            "highest_risk_image_url": highest_risk_image_url,
         },
         "feedback": feedback
     }
