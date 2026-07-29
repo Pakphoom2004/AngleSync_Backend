@@ -1,5 +1,9 @@
-from fastapi import APIRouter, File, Form, Request, UploadFile
+import logging
+from typing import Any, Dict, List
+
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field
 import asyncio
 import json
 import os
@@ -7,10 +11,33 @@ import queue
 import shutil
 import threading
 
+from app.exceptions.save_transaction_failed_exception import SaveTransactionFailedException
 from app.services.analysis_results import process_video_analysis
+from app.services.save_analyze import save_analysis_result, logger
 
 router = APIRouter()
 UPLOAD_DIR = "uploads"
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+
+class SaveAnalyzeRequest(BaseModel):
+    user_id: int
+    session_name: str
+    reference_video_id: int
+    video_user_url: str
+    accuracy_score: float
+    risk_frames: List[Dict[str, Any]] = Field(default_factory=list)
+    feedback: Dict[str, Any]
+
+
+def get_supabase_client():
+    from app.config.supabase_client import supabase
+
+    return supabase
 
 
 @router.post("/analyze/stream")
@@ -106,3 +133,25 @@ async def analyze_video_stream(
         event_generator(),
         media_type="text/event-stream"
     )
+
+
+@router.post("/save-analyze")
+async def save_analyze(payload: SaveAnalyzeRequest):
+    payload_data = (
+        payload.model_dump()
+        if hasattr(payload, "model_dump")
+        else payload.dict()
+    )
+
+    logger.info(f"save-analyze risk_frames payload: {payload_data.get('risk_frames')}")
+
+    try:
+        return save_analysis_result(
+            get_supabase_client(),
+            **payload_data
+        )
+    except SaveTransactionFailedException as error:
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )

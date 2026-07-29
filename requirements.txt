@@ -2,6 +2,7 @@ fastapi==0.128.0
 uvicorn==0.40.0
 python-dotenv==1.1.0
 python-multipart
+supabase
 numpy==2.3.4
 opencv-python==4.13.0.90
 matplotlib==3.10.7
