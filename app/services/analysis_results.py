@@ -2,7 +2,7 @@ import io
 import base64
 import math
 import os
-
+from app.services.frame_cache import store_keypoints
 from app.services.motion_analysis import (
     analyze_motion,
     extract_joint_angles,
@@ -216,9 +216,10 @@ def process_video_analysis(
         highest_frame_data["frame"],
         highest_frame_data.get("keypoints")
     )
-    highest_risk_image_url = (
-        f"{base_url}/outputs/{os.path.basename(frame_path)}"
-    )
+
+    store_keypoints(os.path.basename(frame_path), highest_frame_data.get("keypoints"))
+
+    highest_risk_image_url = frame_path
 
     report_progress(90, "generating_feedback", "Generating feedback...")
 

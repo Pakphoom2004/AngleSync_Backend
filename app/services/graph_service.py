@@ -5,14 +5,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# Generate risk graph from frame-by-frame risk scores
 import io
-import os
 import uuid
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 from PIL import Image
+
+from app.config.supabase_client import supabase
+
+STORAGE_BUCKET = "AngleSync_Project"
+STORAGE_FOLDER = "risk_frames"
 
 
 def _open_video_capture(file: str):
@@ -109,18 +109,12 @@ def generate_risk_graph(
 
     return Image.open(buf)
 
-# Save highest risk frame image
+
 def save_highest_risk_frame(
         video_path: str,
         frame_number: int,
         keypoints=None
 ):
-
-    os.makedirs(
-        "data/outputs",
-        exist_ok=True
-    )
-
     cap = _open_video_capture(video_path)
 
     try:
@@ -170,18 +164,25 @@ def save_highest_risk_frame(
             keypoints
         )
 
-    risk_frame = (
-        "data/outputs/"
-        f"highest_risk_frame_{uuid.uuid4().hex}.jpg"
-    )
-
-    cv2.imwrite(
-        risk_frame,
-        frame
-    )
-
+    encode_success, buffer = cv2.imencode(".jpg", frame)
     cap.release()
-    return risk_frame
+
+    if not encode_success:
+        raise Exception("Failed to encode highest risk frame image.")
+
+    filename = f"highest_risk_frame_{uuid.uuid4().hex}.jpg"
+    storage_path = f"{STORAGE_FOLDER}/{filename}"
+    image_bytes = buffer.tobytes()
+
+    supabase.storage.from_(STORAGE_BUCKET).upload(
+        storage_path,
+        image_bytes,
+        {"content-type": "image/jpeg"}
+    )
+
+    public_url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(storage_path)
+
+    return public_url
 
 
 SKELETON_CONNECTIONS = [
