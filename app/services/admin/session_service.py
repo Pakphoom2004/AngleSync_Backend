@@ -17,10 +17,10 @@ def session_list(
     if filter_date is not None:
         start_of_day = filter_date.isoformat()
         end_of_day = (filter_date + timedelta(days=1)).isoformat()
-        query = query.gte("saved_at", start_of_day).lt("saved_at", end_of_day)
+        query = query.gte("analysis_date", start_of_day).lt("analysis_date", end_of_day)
 
     ascending = sort_order == "asc"
-    query = query.order("saved_at", desc=not ascending)
+    query = query.order("analysis_date", desc=not ascending)
 
     response = query.execute()
     sessions = response.data or []

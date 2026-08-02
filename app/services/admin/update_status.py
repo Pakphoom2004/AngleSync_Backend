@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, Any
 
 from supabase import Client
 
@@ -31,3 +31,12 @@ def update_user_status(
         "success": True,
         "message": "User status updated successfully.",
     }
+
+def list_users(supabase: Client) -> List[Dict[str, Any]]:
+    response = (
+        supabase.table("users")
+        .select("user_id, username, user_role, user_status")
+        .order("username")
+        .execute()
+    )
+    return response.data or []
