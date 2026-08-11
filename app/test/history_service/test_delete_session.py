@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, call
-from app.services.history_service import delete_session
+from app.services.history_user import delete_session
 from app.exceptions.session_delete_failed_exception import SessionDeleteFailedException
 
 
@@ -77,7 +77,7 @@ def test_delete_session_raises_when_session_not_found():
     with pytest.raises(SessionDeleteFailedException) as exc_info:
         delete_session(mock_supabase, user_id=1, session_id=999)
 
-    assert exc_info.value.message == "Unable to delete this record. Please try again."
+    assert str(exc_info.value) == "Unable to delete this record. Please try again."
 
     called_tables = [c.args[0] for c in mock_supabase.table.call_args_list]
     assert "risk_frames" not in called_tables
@@ -94,4 +94,4 @@ def test_delete_session_raises_when_delete_operation_fails():
     with pytest.raises(SessionDeleteFailedException) as exc_info:
         delete_session(mock_supabase, user_id=1, session_id=101)
 
-    assert exc_info.value.message == "Unable to delete this record. Please try again."
+    assert str(exc_info.value) == "Unable to delete this record. Please try again."

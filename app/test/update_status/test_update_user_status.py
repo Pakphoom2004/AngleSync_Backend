@@ -48,7 +48,7 @@ def test_update_user_status_raises_when_admin_deactivates_self():
             new_status="Inactive",
         )
 
-    assert exc_info.value.message == "Unable to update user status. Please try again."
+    assert str(exc_info.value) == "Unable to update user status. Please try again."
     mock_supabase.table.assert_not_called()
 
 
@@ -66,4 +66,4 @@ def test_update_user_status_raises_when_db_update_fails():
             new_status="Inactive",
         )
 
-    assert exc_info.value.message == "Unable to update user status. Please try again."
+    assert str(exc_info.value) == "Unable to update user status. Please try again."

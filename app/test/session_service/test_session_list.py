@@ -81,4 +81,4 @@ def test_session_list_raises_when_no_sessions_match_filter_date():
             filter_date=date(2026, 1, 1),
         )
 
-    assert exc_info.value.message == "No sessions found for the selected date."
+    assert str(exc_info.value) == "No sessions found for the selected date."
