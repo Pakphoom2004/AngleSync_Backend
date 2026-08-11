@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from app.services.history_user import history_list
+from app.services.history_user.history_service import history_list
 from app.exceptions.history_exception import HistoryException
 
 SESSIONS = [

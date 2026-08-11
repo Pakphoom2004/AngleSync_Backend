@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, call
-from app.services.history_user import delete_session
+from app.services.history_user.history_service import delete_session
 from app.exceptions.session_delete_failed_exception import SessionDeleteFailedException
 
 

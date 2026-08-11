@@ -130,7 +130,7 @@ def test_save_analysis_result_raises_when_session_insert_fails():
             feedback=FEEDBACK_SIMPLE,
         )
 
-    assert exc_info.value.message == "Unable to save result. Please try again."
+    assert str(exc_info.value) == "Unable to save result. Please try again."
 
 
 # UT-03
@@ -172,7 +172,7 @@ def test_save_analysis_result_raises_and_cleans_up_when_risk_frames_insert_fails
             feedback=FEEDBACK_SIMPLE,
         )
 
-    assert exc_info.value.message == "Unable to save result. Please try again."
+    assert str(exc_info.value) == "Unable to save result. Please try again."
 
     called_tables = [c.args[0] for c in mock_supabase.table.call_args_list]
     assert "risk_frames" in called_tables

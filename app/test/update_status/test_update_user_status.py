@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from app.services.user_management_service import update_user_status
+from app.services.admin.update_status import update_user_status
 from app.exceptions.status_update_failed_exception import StatusUpdateFailedException
 
 

@@ -91,7 +91,7 @@ def test_dashboard_summary_raises_when_user_is_not_admin():
     with pytest.raises(UnauthorizedAccessException) as exc_info:
         dashboard_summary(mock_supabase, user_id=2)
 
-    assert str(exc_info.value) == "Unable to load data. Please try again."
+    assert str(exc_info.value) == "Unable to process your request. Please try again."
 
 
 # UT-04
@@ -104,4 +104,4 @@ def test_dashboard_summary_raises_when_count_query_fails():
     with pytest.raises(UnauthorizedAccessException) as exc_info:
         dashboard_summary(mock_supabase, user_id=1)
 
-    assert str(exc_info.value) == "Unable to load data. Please try again."
+    assert str(exc_info.value) == "Unable to process your request. Please try again."

@@ -2,6 +2,8 @@ import pytest
 import numpy as np
 from unittest.mock import MagicMock, patch, call
 
+from PIL import Image
+
 from app.services.graph_service import save_highest_risk_frame
 
 
@@ -44,8 +46,7 @@ class TestSaveHighestRiskFrame:
 
         result = save_highest_risk_frame("exercise_vid.mp4", 150, None)
 
-        assert result.startswith("data/outputs/highest_risk_frame_")
-        assert result.endswith(".jpg")
+        assert isinstance(result, Image.Image)
 
     @patch("app.services.graph_service.draw_skeleton_on_frame")
     @patch("app.services.graph_service.cv2.imwrite")
@@ -60,8 +61,7 @@ class TestSaveHighestRiskFrame:
         result = save_highest_risk_frame("exercise_vid.mp4", 150, KP01)
 
         mock_draw.assert_called_once()
-        assert result.startswith("data/outputs/highest_risk_frame_")
-        assert result.endswith(".jpg")
+        assert isinstance(result, Image.Image)
 
     @patch("app.services.graph_service.cv2.VideoCapture")
     def test_raises_exception_when_frame_cannot_be_extracted(
