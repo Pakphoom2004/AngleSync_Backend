@@ -5,12 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/routes/admin_route.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/dashboard_service/test_dashboard_summary.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/save_analyze/test_save_analysis_result.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/session_service/test_session_list.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/test_delete_session.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/test_history_list.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/test_session_list.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/update_status/test_update_user_status.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/admin/dashboard_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/admin/dashboard_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/admin/session_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/admin/session_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/admin/update_status.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/admin/update_status.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,46 +40,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python tests.Python tests in feature1.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_UT_M12_013.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_UT_M17_013.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_UT_M20_013.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_UT_M22_013.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_UT_M23_014.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_UT_M27_013.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.app.executor&quot;: &quot;Run&quot;,
-    &quot;Python.feedback_service.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.run_all.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_db.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;admin&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/pakphoom/AngleSync_Backend&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests in feature1.executor": "Run",
+    "Python tests.Python tests in test.executor": "Run",
+    "Python tests.Python tests in test_UT_M12_013.py.executor": "Run",
+    "Python tests.Python tests in test_UT_M17_013.py.executor": "Run",
+    "Python tests.Python tests in test_UT_M20_013.py.executor": "Run",
+    "Python tests.Python tests in test_UT_M23_014.py.executor": "Run",
+    "Python.app.executor": "Run",
+    "Python.feedback_service.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.run_all.executor": "Run",
+    "Python.test_db.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "test",
+    "last_opened_file_path": "/Users/pakphoom/AngleSync_Backend"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/videos" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/app/services/admin" />
+      <recent name="$PROJECT_DIR$/app/test/update_status" />
+      <recent name="$PROJECT_DIR$/app/test/session_service" />
+      <recent name="$PROJECT_DIR$/app/test/dashboard_service" />
+      <recent name="$PROJECT_DIR$/app/test/save_analyze" />
       <recent name="$PROJECT_DIR$/assets" />
-      <recent name="$PROJECT_DIR$/app" />
-      <recent name="$PROJECT_DIR$/reference_prepare" />
-      <recent name="$PROJECT_DIR$/config" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.app">
+  <component name="RunManager" selected="Python tests.Python tests in test">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
@@ -130,7 +129,7 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in test_UT_M22_013.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in test_UT_M17_013.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -141,11 +140,11 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/feature1/test_UT_M22_013.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/feature1/test_UT_M17_013.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in test_UT_M27_013.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in test_UT_M20_013.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -156,11 +155,11 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/feature1/test_UT_M27_013.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/feature1/test_UT_M20_013.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in test_UT_M30_014.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in test_UT_M23_014.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -171,17 +170,17 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/feature1/test_UT_M30_014.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/feature1/test_UT_M23_014.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python tests.Python tests in test" />
-        <item itemvalue="Python tests.Python tests in test_UT_M22_013.py" />
-        <item itemvalue="Python tests.Python tests in test_UT_M27_013.py" />
+        <item itemvalue="Python tests.Python tests in test_UT_M23_014.py" />
+        <item itemvalue="Python tests.Python tests in test_UT_M20_013.py" />
+        <item itemvalue="Python tests.Python tests in test_UT_M17_013.py" />
         <item itemvalue="Python tests.Python tests in feature1" />
-        <item itemvalue="Python tests.Python tests in test_UT_M30_014.py" />
       </list>
     </recent_temporary>
   </component>
@@ -224,16 +223,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/exceptions/keypoint_not_detected_exception.py</url>
-          <line>7</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
