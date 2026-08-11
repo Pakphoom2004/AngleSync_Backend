@@ -197,4 +197,4 @@ def test_save_analysis_result_raises_when_foreign_key_invalid():
             feedback=FEEDBACK_SIMPLE,
         )
 
-    assert exc_info.value.message == "Unable to save result. Please try again."
+    assert str(exc_info.value) == "Unable to save result. Please try again."

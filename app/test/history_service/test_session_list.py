@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from app.services.history_service import session_detail
+from app.services.history_user import session_detail
 from app.exceptions.history_exception import HistoryException
 
 
@@ -122,4 +122,4 @@ def test_session_detail_raises_when_db_query_fails():
     with pytest.raises(HistoryException) as exc_info:
         session_detail(mock_supabase, user_id=1, session_id=101)
 
-    assert exc_info.value.message == "Couldn't load your history right now. Please try again."
+    assert str(exc_info.value) == "Couldn't load your history right now. Please try again."
