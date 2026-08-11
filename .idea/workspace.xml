@@ -5,13 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/test/dashboard_service/test_dashboard_summary.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/save_analyze/test_save_analysis_result.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/session_service/test_session_list.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/test_delete_session.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/test_history_list.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/test_session_list.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/update_status/test_update_user_status.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/assets/yolo11m-pose.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M17_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M17_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M1_008.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M1_008.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M20_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M20_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M23_014.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M23_014.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M2_009.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M2_009.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +59,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "dev",
+    "git-widget-placeholder": "test",
     "last_opened_file_path": "/Users/pakphoom/AngleSync_Backend"
   }
 }]]></component>
@@ -68,10 +69,11 @@
       <recent name="$PROJECT_DIR$/videos" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/test/update_status" />
+      <recent name="$PROJECT_DIR$/app/test/session_service" />
+      <recent name="$PROJECT_DIR$/app/test/dashboard_service" />
+      <recent name="$PROJECT_DIR$/app/test/save_analyze" />
       <recent name="$PROJECT_DIR$/assets" />
-      <recent name="$PROJECT_DIR$/app" />
-      <recent name="$PROJECT_DIR$/reference_prepare" />
-      <recent name="$PROJECT_DIR$/config" />
     </key>
   </component>
   <component name="RunManager" selected="Python tests.Python tests in test">
