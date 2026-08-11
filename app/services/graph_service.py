@@ -6,13 +6,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 import io
-import uuid
 from PIL import Image
-
-from app.config.supabase_client import supabase
-
-STORAGE_BUCKET = "AngleSync_Project"
-STORAGE_FOLDER = "risk_frames"
 
 
 def _open_video_capture(file: str):
@@ -114,7 +108,11 @@ def save_highest_risk_frame(
         video_path: str,
         frame_number: int,
         keypoints=None
-):
+) -> Image.Image:
+    """
+    ดึงเฟรมภาพความเสี่ยงสูงสุด วาด Skeleton ลงบนภาพ
+    แล้วคืนค่ากลับไปเป็น PIL Image ใน RAM โดยตรง (ไม่เซฟไฟล์ดิสก์ และไม่อัปโหลดที่นี่)
+    """
     cap = _open_video_capture(video_path)
 
     try:
@@ -158,31 +156,19 @@ def save_highest_risk_frame(
             f"Failed to extract frame. Requested frame={frame_number}, "
             f"target frame={target_frame}, total frames={total_frames}."
         )
+
+    # วาด Keypoints บนเฟรม BGR
     if keypoints:
         frame = draw_skeleton_on_frame(
             frame,
             keypoints
         )
 
-    encode_success, buffer = cv2.imencode(".jpg", frame)
     cap.release()
 
-    if not encode_success:
-        raise Exception("Failed to encode highest risk frame image.")
-
-    filename = f"highest_risk_frame_{uuid.uuid4().hex}.jpg"
-    storage_path = f"{STORAGE_FOLDER}/{filename}"
-    image_bytes = buffer.tobytes()
-
-    supabase.storage.from_(STORAGE_BUCKET).upload(
-        storage_path,
-        image_bytes,
-        {"content-type": "image/jpeg"}
-    )
-
-    public_url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(storage_path)
-
-    return public_url
+    # 💥 แปลงจาก OpenCV BGR เป็น RGB แล้วส่งคืนเป็น PIL Image ใน Memory ทันที
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    return Image.fromarray(frame_rgb)
 
 
 SKELETON_CONNECTIONS = [

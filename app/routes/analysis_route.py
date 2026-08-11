@@ -79,7 +79,7 @@ async def analyze_video_stream(
                     file_path,
                     reference_video_id,
                     progress_callback=progress_callback,
-                    base_url=base_url
+                    
                 )
                 events.put(
                     (

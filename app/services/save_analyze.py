@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def _first_present(data: Dict[str, Any], *keys: str) -> Any:
     for key in keys:
         value = data.get(key)
-        if value is not None:
+        if value is not None and str(value).strip() != "":
             return value
     return None
 
@@ -81,11 +81,18 @@ def save_analysis_result(
         if risk_frames:
             risk_frame_rows = []
             for frame in risk_frames:
+                # 💥 เพิ่ม Key "highest_risk_image_url" และ "image" เพื่อรองรับ Payload จาก Flutter
                 skeleton_overlay_url = _first_present(
                     frame,
+                    "highest_risk_image_url",
+                    "image",
                     "skeleton_overlay_url",
                     "image_url"
                 )
+
+                if skeleton_overlay_url and ("127.0.0.1" in str(skeleton_overlay_url) or "localhost" in str(skeleton_overlay_url)):
+                    skeleton_overlay_url = ""
+                
                 risk_frame_rows.append(
                     {
                         "session_id": session_id,
@@ -93,7 +100,7 @@ def save_analysis_result(
                         "risk_percentage": _first_present(
                             frame, "risk_percentage", "risk", "risk_score"
                         ),
-                        "skeleton_overlay_url": skeleton_overlay_url,
+                        "skeleton_overlay_url": skeleton_overlay_url or "",
                         "joint_coordinates": _resolve_joint_coordinates(
                             frame, skeleton_overlay_url
                         ),

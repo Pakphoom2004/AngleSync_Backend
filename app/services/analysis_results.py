@@ -1,8 +1,10 @@
 import io
+import os  # 💥 เพิ่ม import os ที่ขาดไป
 import base64
 import math
-import os
+import uuid
 from app.services.frame_cache import store_keypoints
+from app.config.supabase_client import supabase
 from app.services.motion_analysis import (
     analyze_motion,
     extract_joint_angles,
@@ -12,7 +14,6 @@ from app.services.motion_analysis import (
 from app.services.pose_detection import (
     detect_body_keypoints,
     detect_sample_keypoints,
-   
 )
 
 from app.services.graph_service import (
@@ -37,7 +38,7 @@ from app.services.video_validation import (
 
 GRAPH_VISIBLE_RATIO = 0.95
 MAX_GRAPH_SAMPLES = 180
-
+SUPABASE_BUCKET_NAME = "AngleSync_Project"
 
 def _build_graph_samples(
         risk_scores,
@@ -88,7 +89,7 @@ def process_video_analysis(
         video_path: str,
         reference_video_id: int,
         progress_callback=None,
-        base_url="http://localhost:8000"
+       
 ):
     def report_progress(percent, step, message):
         if progress_callback is not None:
@@ -206,20 +207,64 @@ def process_video_analysis(
         frame_times=[frame["time"] for frame in graph_angles_per_frame]
     )
 
-    # แปลง PIL Image เป็น base64
+    # แปลง PIL Graph Image เป็น base64
     buf = io.BytesIO()
     graph_image.save(buf, format="PNG")
     graph_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
 
-    frame_path = save_highest_risk_frame(
+    filename = f"highest_risk_frame_{uuid.uuid4().hex}.jpg"
+    store_keypoints(filename, highest_frame_data.get("keypoints"))
+
+    # ดึงเฟรมรูปภาพ (PIL Image / OpenCV Frame)
+    frame_image = save_highest_risk_frame(
         video_path,
         highest_frame_data["frame"],
         highest_frame_data.get("keypoints")
     )
 
-    store_keypoints(os.path.basename(frame_path), highest_frame_data.get("keypoints"))
+    # แปลงภาพลงใน BytesIO Buffer ใน RAM
+    img_byte_arr = io.BytesIO()
+    
+    # 💥 ปรับปรุงส่วนแปลงรูปภาพเป็น Bytes ให้ครอบคลุม ป้องกัน Crash
+    try:
+        if hasattr(frame_image, "save"):
+            # ถ้าเป็น PIL Image
+            frame_image.save(img_byte_arr, format="JPEG")
+        elif isinstance(frame_image, str) and os.path.exists(frame_image):
+            # ถ้าคืนค่ามาเป็น Path String
+            with open(frame_image, "rb") as f:
+                img_byte_arr.write(f.read())
+            try:
+                os.remove(frame_image)  
+            except Exception:
+                pass
+        else:
+            print(f"[WARNING] Unrecognized frame_image format: {type(frame_image)}")
+    except Exception as prepare_err:
+        print(f"[ERROR] Failed to prepare frame image bytes: {prepare_err}")
 
-    highest_risk_image_url = frame_path
+    img_bytes = img_byte_arr.getvalue()
+    
+    # 💥 กำหนด Storage Path ใน Supabase (ใช้ filename ตรงๆ)
+    storage_path = filename 
+
+    highest_risk_image_url = ""
+    if len(img_bytes) > 0:
+        try:
+            supabase.storage.from_(SUPABASE_BUCKET_NAME).upload(
+                path=storage_path,
+                file=img_bytes,
+                file_options={"content-type": "image/jpeg", "upsert": "true"}
+            )
+
+            highest_risk_image_url = supabase.storage.from_(SUPABASE_BUCKET_NAME).get_public_url(storage_path)
+            print(f"[DEBUG] Supabase Direct Upload Success: {highest_risk_image_url}")
+
+        except Exception as upload_err:
+            print(f"[ERROR] Failed to upload frame to Supabase: {upload_err}")
+            highest_risk_image_url = ""
+    else:
+        print("[ERROR] img_bytes is empty. Skipping Supabase upload.")
 
     report_progress(90, "generating_feedback", "Generating feedback...")
 
@@ -267,7 +312,7 @@ def process_video_analysis(
             "frame": highest_frame_data["frame"],
             "time": round(highest_frame_data["time"], 2),
             "risk": round(highest_frame_data["risk_score"], 2),
-            "image": frame_path
+            "image": highest_risk_image_url
         },
         "graph_data": {
             "graph_image": f"data:image/png;base64,{graph_base64}",
