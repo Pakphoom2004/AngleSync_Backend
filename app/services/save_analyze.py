@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import Any, Dict, List
 
-if TYPE_CHECKING:
-    from supabase import Client
 
+from sqlalchemy import bindparam, text
+from sqlalchemy.dialects.postgresql import JSONB
+
+from app.config.db import get_connection
 from app.exceptions.save_transaction_failed_exception import SaveTransactionFailedException
 from app.services.frame_cache import get_keypoints
 
@@ -46,7 +48,6 @@ def _resolve_joint_coordinates(frame: Dict[str, Any], skeleton_overlay_url: Any)
 
 
 def save_analysis_result(
-    supabase: Client,
     user_id: int,
     session_name: str,
     reference_video_id: int,
@@ -59,77 +60,93 @@ def save_analysis_result(
     session_id = None
 
     try:
-        session_response = (
-            supabase.table("analysis_sessions")
-            .insert(
+        with get_connection() as conn:
+            session_result = conn.execute(
+                text(
+                    """
+                    INSERT INTO analysis_sessions
+                        (user_id, session_name, reference_video_id, video_user_url, accuracy_score)
+                    VALUES
+                        (:user_id, :session_name, :reference_video_id, :video_user_url, :accuracy_score)
+                    RETURNING session_id
+                    """
+                ),
                 {
                     "user_id": user_id,
                     "session_name": session_name,
                     "reference_video_id": reference_video_id,
                     "video_user_url": video_user_url,
                     "accuracy_score": accuracy_score,
-                }
-            )
-            .execute()
-        )
-
-        if not session_response.data:
-            raise SaveTransactionFailedException()
-
-        session_id = session_response.data[0]["session_id"]
-
-        if risk_frames:
-            risk_frame_rows = []
-            for frame in risk_frames:
-                # 💥 เพิ่ม Key "highest_risk_image_url" และ "image" เพื่อรองรับ Payload จาก Flutter
-                skeleton_overlay_url = _first_present(
-                    frame,
-                    "highest_risk_image_url",
-                    "image",
-                    "skeleton_overlay_url",
-                    "image_url"
-                )
-
-                if skeleton_overlay_url and ("127.0.0.1" in str(skeleton_overlay_url) or "localhost" in str(skeleton_overlay_url)):
-                    skeleton_overlay_url = ""
-                
-                risk_frame_rows.append(
-                    {
-                        "session_id": session_id,
-                        "frame_number": _first_present(frame, "frame_number", "frame"),
-                        "risk_percentage": _first_present(
-                            frame, "risk_percentage", "risk", "risk_score"
-                        ),
-                        "skeleton_overlay_url": skeleton_overlay_url or "",
-                        "joint_coordinates": _resolve_joint_coordinates(
-                            frame, skeleton_overlay_url
-                        ),
-                    }
-                )
-
-            risk_frames_response = (
-                supabase.table("risk_frames").insert(risk_frame_rows).execute()
+                },
             )
 
-            if not risk_frames_response.data:
+            session_row = session_result.mappings().first()
+            if not session_row:
                 raise SaveTransactionFailedException()
 
-        feedback_response = (
-            supabase.table("feedbacks")
-            .insert(
+            session_id = session_row["session_id"]
+
+            if risk_frames:
+                for frame in risk_frames:
+                    # 💥 เพิ่ม Key "highest_risk_image_url" และ "image" เพื่อรองรับ Payload จาก Flutter
+                    skeleton_overlay_url = _first_present(
+                        frame,
+                        "highest_risk_image_url",
+                        "image",
+                        "skeleton_overlay_url",
+                        "image_url"
+                    )
+
+                    if skeleton_overlay_url and ("127.0.0.1" in str(skeleton_overlay_url) or "localhost" in str(skeleton_overlay_url)):
+                        skeleton_overlay_url = ""
+
+                    risk_frame_result = conn.execute(
+                        text(
+                            """
+                            INSERT INTO risk_frames
+                                (session_id, frame_number, risk_percentage, skeleton_overlay_url, joint_coordinates)
+                            VALUES
+                                (:session_id, :frame_number, :risk_percentage, :skeleton_overlay_url, :joint_coordinates)
+                            RETURNING frame_id
+                            """
+                        ).bindparams(bindparam("joint_coordinates", type_=JSONB)),
+                        {
+                            "session_id": session_id,
+                            "frame_number": _first_present(frame, "frame_number", "frame"),
+                            "risk_percentage": _first_present(
+                                frame, "risk_percentage", "risk", "risk_score"
+                            ),
+                            "skeleton_overlay_url": skeleton_overlay_url or "",
+                            "joint_coordinates": _resolve_joint_coordinates(
+                                frame, skeleton_overlay_url
+                            ),
+                        },
+                    )
+
+                    if not risk_frame_result.mappings().first():
+                        raise SaveTransactionFailedException()
+
+            feedback_result = conn.execute(
+                text(
+                    """
+                    INSERT INTO feedbacks
+                        (session_id, form_summary, injury_risk, corrective_cues, practice_plan)
+                    VALUES
+                        (:session_id, :form_summary, :injury_risk, :corrective_cues, :practice_plan)
+                    RETURNING feedback_id
+                    """
+                ),
                 {
                     "session_id": session_id,
                     "form_summary": _text_value(feedback.get("form_summary")),
                     "injury_risk": _text_value(feedback.get("injury_risk")),
                     "corrective_cues": _text_value(feedback.get("corrective_cues")),
                     "practice_plan": _text_value(feedback.get("practice_plan")),
-                }
+                },
             )
-            .execute()
-        )
 
-        if not feedback_response.data:
-            raise SaveTransactionFailedException()
+            if not feedback_result.mappings().first():
+                raise SaveTransactionFailedException()
 
         return {
             "success": True,
@@ -138,22 +155,32 @@ def save_analysis_result(
         }
 
     except SaveTransactionFailedException:
-        _cleanup_partial_save(supabase, session_id)
+        _cleanup_partial_save(session_id)
         raise
     except Exception:
         logger.exception("Failed to save analysis result")
-        _cleanup_partial_save(supabase, session_id)
+        _cleanup_partial_save(session_id)
         raise SaveTransactionFailedException()
 
 
-def _cleanup_partial_save(supabase: Client, session_id: int) -> None:
+def _cleanup_partial_save(session_id: int) -> None:
 
     if session_id is None:
         return
 
     try:
-        supabase.table("risk_frames").delete().eq("session_id", session_id).execute()
-        supabase.table("feedbacks").delete().eq("session_id", session_id).execute()
-        supabase.table("analysis_sessions").delete().eq("session_id", session_id).execute()
+        with get_connection() as conn:
+            conn.execute(
+                text("DELETE FROM risk_frames WHERE session_id = :session_id"),
+                {"session_id": session_id},
+            )
+            conn.execute(
+                text("DELETE FROM feedbacks WHERE session_id = :session_id"),
+                {"session_id": session_id},
+            )
+            conn.execute(
+                text("DELETE FROM analysis_sessions WHERE session_id = :session_id"),
+                {"session_id": session_id},
+            )
     except Exception:
         pass

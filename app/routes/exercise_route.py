@@ -1,18 +1,21 @@
 from fastapi import APIRouter
+from sqlalchemy import text
+
+from app.config.db import get_connection
 
 router = APIRouter()
 
 
-def get_supabase_client():
-    from app.config.supabase_client import supabase
-
-    return supabase
-
-
 @router.get("/exercises")
 def get_exercises():
-    response = get_supabase_client().table("exercise_reference") \
-        .select("reference_video_id, exercise_name, reference_video_url, reference_gender") \
-        .execute()
+    with get_connection() as conn:
+        rows = conn.execute(
+            text(
+                """
+                SELECT reference_video_id, exercise_name, reference_video_url, reference_gender
+                FROM exercise_reference
+                """
+            )
+        ).mappings().all()
 
-    return response.data
+    return [dict(row) for row in rows]

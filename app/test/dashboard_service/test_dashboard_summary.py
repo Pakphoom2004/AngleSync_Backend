@@ -1,68 +1,65 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from app.services.admin.dashboard_service import dashboard_summary
 from app.exceptions.unauthorized_access_exception import UnauthorizedAccessException
 
 ADMINISTRATOR_ROLE = "Admin"
 
 
-def _make_supabase_mock(
+def _mock_connection(
     user_role=ADMINISTRATOR_ROLE,
     user_query_raises=None,
-    users_count=None,
-    sessions_count=None,
+    users_count=0,
+    sessions_count=0,
     count_query_raises=None,
 ):
-    mock_supabase = MagicMock()
-    call_count = {"n": 0}
+    mock_conn = MagicMock()
+    calls = {"n": 0}
 
-    def table_side_effect(table_name):
-        builder = MagicMock()
-        n = call_count["n"]
-        call_count["n"] += 1
+    def execute_side_effect(*args, **kwargs):
+        n = calls["n"]
+        calls["n"] += 1
 
-        # 1st call: role check query
-        if n == 0 and table_name == "users":
+        if n == 0:
             if user_query_raises:
-                builder.select.return_value.eq.return_value.limit.return_value.execute.side_effect = user_query_raises
-            else:
-                result = MagicMock()
-                result.data = [{"user_role": user_role}] if user_role else []
-                builder.select.return_value.eq.return_value.limit.return_value.execute.return_value = result
+                raise user_query_raises
+            result = MagicMock()
+            result.mappings.return_value.first.return_value = (
+                {"user_role": user_role} if user_role else None
+            )
+            return result
 
-        # 2nd call: users count
-        elif table_name == "users" and n > 0:
-            if count_query_raises:
-                builder.select.return_value.execute.side_effect = count_query_raises
-            else:
-                result = MagicMock()
-                result.count = users_count
-                builder.select.return_value.execute.return_value = result
+        if count_query_raises:
+            raise count_query_raises
 
-        # 3rd call: sessions count
-        elif table_name == "analysis_sessions":
-            if count_query_raises:
-                builder.select.return_value.execute.side_effect = count_query_raises
-            else:
-                result = MagicMock()
-                result.count = sessions_count
-                builder.select.return_value.execute.return_value = result
+        result = MagicMock()
+        result.scalar_one.return_value = users_count if n == 1 else sessions_count
+        return result
 
-        return builder
+    mock_conn.execute.side_effect = execute_side_effect
+    return mock_conn
 
-    mock_supabase.table.side_effect = table_side_effect
-    return mock_supabase
+
+def _patch_get_connection(mock_conn):
+    mock_get_connection = MagicMock()
+    mock_get_connection.return_value.__enter__.return_value = mock_conn
+    mock_get_connection.return_value.__exit__.return_value = False
+    return patch(
+        "app.services.admin.dashboard_service.get_connection",
+        mock_get_connection,
+    )
 
 
 # UT-01
 def test_dashboard_summary_returns_correct_counts():
-    mock_supabase = _make_supabase_mock(
+    mock_conn = _mock_connection(
         user_role=ADMINISTRATOR_ROLE,
         users_count=25,
         sessions_count=120,
     )
 
-    result = dashboard_summary(mock_supabase, user_id=1)
+    with _patch_get_connection(mock_conn):
+        result = dashboard_summary(user_id=1)
 
     assert result["total_users"] == 25
     assert result["total_analysis_sessions"] == 120
@@ -70,13 +67,14 @@ def test_dashboard_summary_returns_correct_counts():
 
 # UT-02
 def test_dashboard_summary_returns_zero_when_no_data():
-    mock_supabase = _make_supabase_mock(
+    mock_conn = _mock_connection(
         user_role=ADMINISTRATOR_ROLE,
-        users_count=None,
-        sessions_count=None,
+        users_count=0,
+        sessions_count=0,
     )
 
-    result = dashboard_summary(mock_supabase, user_id=1)
+    with _patch_get_connection(mock_conn):
+        result = dashboard_summary(user_id=1)
 
     assert result["total_users"] == 0
     assert result["total_analysis_sessions"] == 0
@@ -84,24 +82,26 @@ def test_dashboard_summary_returns_zero_when_no_data():
 
 # UT-03
 def test_dashboard_summary_raises_when_user_is_not_admin():
-    mock_supabase = _make_supabase_mock(
+    mock_conn = _mock_connection(
         user_role="Member",
     )
 
-    with pytest.raises(UnauthorizedAccessException) as exc_info:
-        dashboard_summary(mock_supabase, user_id=2)
+    with _patch_get_connection(mock_conn):
+        with pytest.raises(UnauthorizedAccessException) as exc_info:
+            dashboard_summary(user_id=2)
 
     assert str(exc_info.value) == "Unable to process your request. Please try again."
 
 
 # UT-04
 def test_dashboard_summary_raises_when_count_query_fails():
-    mock_supabase = _make_supabase_mock(
+    mock_conn = _mock_connection(
         user_role=ADMINISTRATOR_ROLE,
         count_query_raises=Exception("DB connection error"),
     )
 
-    with pytest.raises(UnauthorizedAccessException) as exc_info:
-        dashboard_summary(mock_supabase, user_id=1)
+    with _patch_get_connection(mock_conn):
+        with pytest.raises(UnauthorizedAccessException) as exc_info:
+            dashboard_summary(user_id=1)
 
     assert str(exc_info.value) == "Unable to process your request. Please try again."

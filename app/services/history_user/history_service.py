@@ -1,74 +1,87 @@
 from typing import Any, Dict, List, Optional
 
-from supabase import Client
+from sqlalchemy import text
 
+from app.config.db import get_connection
 from app.exceptions.history_exception import HistoryException
 from app.exceptions.session_delete_failed_exception import SessionDeleteFailedException
 
 def history_list(
-    supabase: Client,
     user_id: int,
     search_term: Optional[str],
     sort_order: str,
 ) -> List[Dict[str, Any]]:
+    ascending = sort_order == "asc"
+    order_clause = "ASC" if ascending else "DESC"
+
+    query = (
+        "SELECT session_id, session_name, reference_video_id, accuracy_score, analysis_date "
+        "FROM analysis_sessions WHERE user_id = :user_id"
+    )
+    params: Dict[str, Any] = {"user_id": user_id}
+
+    if search_term:
+        query += " AND session_name ILIKE :search_term"
+        params["search_term"] = f"%{search_term}%"
+
+    query += f" ORDER BY analysis_date {order_clause}"
+
     try:
-        query = (
-            supabase.table("analysis_sessions")
-            .select("session_id, session_name, reference_video_id, accuracy_score, analysis_date")
-            .eq("user_id", user_id)
-        )
-
-        if search_term:
-            query = query.ilike("session_name", f"%{search_term}%")
-
-        ascending = sort_order == "asc"
-        query = query.order("analysis_date", desc=not ascending)
-
-        response = query.execute()
+        with get_connection() as conn:
+            rows = conn.execute(text(query), params).mappings().all()
     except Exception:
         raise HistoryException()
 
-    return response.data or []
+    return [dict(row) for row in rows]
 
 
 def session_detail(
-        supabase: Client,
         user_id: int,
         session_id: int,
 ) -> Dict[str, Any]:
     try:
-        session_response = (
-            supabase.table("analysis_sessions")
-            .select("session_name, video_user_url, accuracy_score,reference_video_id")
-            .eq("session_id", session_id)
-            .eq("user_id", user_id)
-            .limit(1)
-            .execute()
-        )
+        with get_connection() as conn:
+            session_row = conn.execute(
+                text(
+                    """
+                    SELECT session_name, video_user_url, accuracy_score, reference_video_id
+                    FROM analysis_sessions
+                    WHERE session_id = :session_id AND user_id = :user_id
+                    LIMIT 1
+                    """
+                ),
+                {"session_id": session_id, "user_id": user_id},
+            ).mappings().first()
 
-        if not session_response.data:
-            raise HistoryException()
+            if not session_row:
+                raise HistoryException()
 
-        session = session_response.data[0]
+            session = dict(session_row)
 
-        risk_frames_response = (
-            supabase.table("risk_frames")
-            .select(
-                "frame_id, session_id, frame_number, risk_percentage, "
-                "skeleton_overlay_url, joint_coordinates"
-            )
-            .eq("session_id", session_id)
-            .order("frame_number")
-            .execute()
-        )
+            risk_frames_rows = conn.execute(
+                text(
+                    """
+                    SELECT frame_id, session_id, frame_number, risk_percentage,
+                           skeleton_overlay_url, joint_coordinates
+                    FROM risk_frames
+                    WHERE session_id = :session_id
+                    ORDER BY frame_number
+                    """
+                ),
+                {"session_id": session_id},
+            ).mappings().all()
 
-        feedback_response = (
-            supabase.table("feedbacks")
-            .select("form_summary, injury_risk, corrective_cues, practice_plan")
-            .eq("session_id", session_id)
-            .limit(1)
-            .execute()
-        )
+            feedback_row = conn.execute(
+                text(
+                    """
+                    SELECT form_summary, injury_risk, corrective_cues, practice_plan
+                    FROM feedbacks
+                    WHERE session_id = :session_id
+                    LIMIT 1
+                    """
+                ),
+                {"session_id": session_id},
+            ).mappings().first()
     except HistoryException:
         raise
     except Exception:
@@ -76,10 +89,10 @@ def session_detail(
 
     video_user_url = session.get("video_user_url") or "Video not available."
 
-    feedback_data = feedback_response.data[0] if feedback_response.data else {}
+    feedback_data = dict(feedback_row) if feedback_row else {}
 
     # 💥 ปรับปรุงส่วนจัดโครงสร้าง risk_frames ให้รองรับทุกชื่อ Key ที่ Flutter อาจใช้
-    raw_risk_frames = risk_frames_response.data or []
+    raw_risk_frames = [dict(row) for row in risk_frames_rows]
     formatted_risk_frames = []
 
     for frame in raw_risk_frames:
@@ -118,36 +131,49 @@ def session_detail(
 
 
 def delete_session(
-        supabase: Client,
         user_id: int,
         session_id: int,
 ) -> Dict[str, bool]:
     try:
-        session_response = (
-            supabase.table("analysis_sessions")
-            .select("session_id")
-            .eq("session_id", session_id)
-            .eq("user_id", user_id)
-            .limit(1)
-            .execute()
-        )
+        with get_connection() as conn:
+            session_row = conn.execute(
+                text(
+                    """
+                    SELECT session_id
+                    FROM analysis_sessions
+                    WHERE session_id = :session_id AND user_id = :user_id
+                    LIMIT 1
+                    """
+                ),
+                {"session_id": session_id, "user_id": user_id},
+            ).mappings().first()
 
-        if not session_response.data:
-            raise SessionDeleteFailedException()
+            if not session_row:
+                raise SessionDeleteFailedException()
 
-        supabase.table("risk_frames").delete().eq("session_id", session_id).execute()
-        supabase.table("feedbacks").delete().eq("session_id", session_id).execute()
+            conn.execute(
+                text("DELETE FROM risk_frames WHERE session_id = :session_id"),
+                {"session_id": session_id},
+            )
+            conn.execute(
+                text("DELETE FROM feedbacks WHERE session_id = :session_id"),
+                {"session_id": session_id},
+            )
 
-        delete_response = (
-            supabase.table("analysis_sessions")
-            .delete()
-            .eq("session_id", session_id)  
-            .eq("user_id", user_id)
-            .execute()
-        )
+            delete_result = conn.execute(
+                text(
+                    """
+                    DELETE FROM analysis_sessions
+                    WHERE session_id = :session_id AND user_id = :user_id
+                    RETURNING session_id
+                    """
+                ),
+                {"session_id": session_id, "user_id": user_id},
+            )
+            deleted = delete_result.mappings().all()
 
-        if not delete_response.data:
-            raise SessionDeleteFailedException()
+            if not deleted:
+                raise SessionDeleteFailedException()
     except SessionDeleteFailedException:
         raise
     except Exception:

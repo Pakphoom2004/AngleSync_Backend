@@ -34,12 +34,6 @@ class SaveAnalyzeRequest(BaseModel):
     feedback: Dict[str, Any]
 
 
-def get_supabase_client():
-    from app.config.supabase_client import supabase
-
-    return supabase
-
-
 @router.post("/analyze/stream")
 async def analyze_video_stream(
     request: Request,
@@ -147,7 +141,6 @@ async def save_analyze(payload: SaveAnalyzeRequest):
 
     try:
         return save_analysis_result(
-            get_supabase_client(),
             **payload_data
         )
     except SaveTransactionFailedException as error:
