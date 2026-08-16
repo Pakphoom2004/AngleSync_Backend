@@ -9,7 +9,10 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-from app.config.supabase_client import supabase
+from sqlalchemy import bindparam
+from sqlalchemy.dialects.postgresql import JSONB
+
+from app.config.storage_client import upload_file, remove_object, get_public_url
 import os
 
 
@@ -70,26 +73,19 @@ options = PoseLandmarkerOptions(
 
 pose = PoseLandmarker.create_from_options(options)
 
-def upload_video_to_supabase(video_path):
+def upload_video_to_garage(video_path):
     filename = os.path.basename(video_path).replace(" ", "_")
-
-    bucket = supabase.storage.from_("AngleSync_Project")
 
     # 🔥 ลบไฟล์เก่าก่อน (ถ้ามี)
     try:
-        bucket.remove([filename])
-    except:
+        remove_object(filename)
+    except Exception:
         pass  # ไม่มีไฟล์ก็ข้าม
 
     # 🔥 อัปโหลดใหม่
-    with open(video_path, "rb") as f:
-        bucket.upload(
-            path=filename,
-            file=f,
-            file_options={"content-type": "video/mp4"}
-        )
+    upload_file(filename, video_path, content_type="video/mp4")
 
-    return bucket.get_public_url(filename)
+    return get_public_url(filename)
 # DOWNLOAD VIDEO
 # =========================
 def download_video(url, output="input.mp4"):
@@ -356,42 +352,81 @@ def save_to_db(video_path, angles_data, keypoints_data):
     # =========================
     # 1. upload video
     # =========================
-    video_url = upload_video_to_supabase(video_path)
+    video_url = upload_video_to_garage(video_path)
 
     gender = "male" if "men" in video_path else "female"
 
-    # =========================
-    # 2. insert video
-    # =========================
-    res = supabase.table("exercise_reference").insert({
-        "exercise_name": os.path.basename(video_path),
-        "reference_video_url": video_url,
-        "reference_gender": gender
-    }).execute()
+    from sqlalchemy import text
+    from app.config.db import get_connection
 
-    video_id = res.data[0]["reference_video_id"]
+    with get_connection() as conn:
+        # =========================
+        # 2. insert video
+        # =========================
+        video_row = conn.execute(
+            text(
+                """
+                INSERT INTO exercise_reference
+                    (exercise_name, reference_video_url, reference_gender)
+                VALUES
+                    (:exercise_name, :reference_video_url, :reference_gender)
+                RETURNING reference_video_id
+                """
+            ),
+            {
+                "exercise_name": os.path.basename(video_path),
+                "reference_video_url": video_url,
+                "reference_gender": gender,
+            },
+        ).mappings().first()
 
-    # =========================
-    # 3. insert frame + pose
-    # =========================
-    for i in range(len(angles_data)):
+        video_id = video_row["reference_video_id"]
 
-        frame = angles_data[i]
-        kp = keypoints_data[i]
+        # =========================
+        # 3. insert frame + pose
+        # =========================
+        for i in range(len(angles_data)):
 
-        frame_res = supabase.table("exercise_reference_frame_data").insert({
-            "parent_video_id": video_id,
-            "frame_sequence": frame["frame"],
-            "frame_time_sec": frame["time"]
-        }).execute()
+            frame = angles_data[i]
+            kp = keypoints_data[i]
 
-        frame_id = frame_res.data[0]["reference_frame_id"]
+            frame_row = conn.execute(
+                text(
+                    """
+                    INSERT INTO exercise_reference_frame_data
+                        (parent_video_id, frame_sequence, frame_time_sec)
+                    VALUES
+                        (:parent_video_id, :frame_sequence, :frame_time_sec)
+                    RETURNING reference_frame_id
+                    """
+                ),
+                {
+                    "parent_video_id": video_id,
+                    "frame_sequence": frame["frame"],
+                    "frame_time_sec": frame["time"],
+                },
+            ).mappings().first()
 
-        supabase.table("exercise_reference_pose_metrics").insert({
-            "related_frame_id": frame_id,
-            "joint_angle_data": frame,
-            "joint_coordinate_data": kp["keypoints"]
-        }).execute()
+            frame_id = frame_row["reference_frame_id"]
+
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO exercise_reference_pose_metrics
+                        (related_frame_id, joint_angle_data, joint_coordinate_data)
+                    VALUES
+                        (:related_frame_id, :joint_angle_data, :joint_coordinate_data)
+                    """
+                ).bindparams(
+                    bindparam("joint_angle_data", type_=JSONB),
+                    bindparam("joint_coordinate_data", type_=JSONB),
+                ),
+                {
+                    "related_frame_id": frame_id,
+                    "joint_angle_data": frame,
+                    "joint_coordinate_data": kp["keypoints"],
+                },
+            )
 
     print(f"✅ Saved to DB: {video_path}")
 # =========================

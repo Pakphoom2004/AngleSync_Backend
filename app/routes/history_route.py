@@ -15,12 +15,6 @@ from app.exceptions.session_delete_failed_exception import SessionDeleteFailedEx
 router = APIRouter()
 
 
-def get_supabase_client():
-    from app.config.supabase_client import supabase
-
-    return supabase
-
-
 @router.get("/history")
 async def get_history(
     user_id: int = Query(1),
@@ -29,7 +23,6 @@ async def get_history(
 ):
     try:
         history = history_list(
-            get_supabase_client(),
             user_id=user_id,
             search_term=search_term,
             sort_order=sort_order,
@@ -46,7 +39,6 @@ async def get_session_detail(
 ):
     try:
         return session_detail(
-            get_supabase_client(),
             user_id=user_id,
             session_id=session_id,
         )
@@ -60,7 +52,6 @@ async def delete_history_session(
 ):
     try:
         return delete_session(
-            get_supabase_client(),
             user_id=user_id,
             session_id=session_id,
         )

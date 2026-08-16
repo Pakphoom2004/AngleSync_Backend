@@ -15,15 +15,10 @@ from app.exceptions.status_update_failed_exception import StatusUpdateFailedExce
 router = APIRouter(prefix="/admin")
 
 
-def get_supabase_client():
-    from app.config.supabase_client import supabase
-    return supabase
-
-
 @router.get("/dashboard-summary")
 async def get_dashboard_summary(user_id: int = Query(...)):
     try:
-        return dashboard_summary(get_supabase_client(), user_id)
+        return dashboard_summary(user_id)
     except UnauthorizedAccessException as error:
         raise HTTPException(status_code=403, detail=str(error))
 
@@ -35,7 +30,7 @@ async def get_sessions(
     filter_date: Optional[date] = Query(None),
 ):
     try:
-        sessions = session_list(get_supabase_client(), user_id, sort_order, filter_date)
+        sessions = session_list(user_id, sort_order, filter_date)
         return {"sessions": sessions}
     except SessionNotFoundException as error:
         raise HTTPException(status_code=404, detail=str(error))
@@ -43,7 +38,7 @@ async def get_sessions(
 
 @router.get("/users")
 async def get_users():
-    users = list_users(get_supabase_client())
+    users = list_users()
     return {"users": users}
 
 
@@ -57,7 +52,6 @@ class UpdateUserStatusRequest(BaseModel):
 async def post_update_user_status(payload: UpdateUserStatusRequest):
     try:
         return update_user_status(
-            get_supabase_client(),
             payload.user_id,
             payload.target_user_id,
             payload.new_status,

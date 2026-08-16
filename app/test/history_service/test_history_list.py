@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from app.services.history_user.history_service import history_list
 from app.exceptions.history_exception import HistoryException
 
@@ -10,32 +10,36 @@ SESSIONS = [
 ]
 
 
-def _make_supabase_mock(return_data=None, raises=None):
-    mock_supabase = MagicMock()
-    builder = MagicMock()
-
-    builder.select.return_value = builder
-    builder.eq.return_value = builder
-    builder.ilike.return_value = builder
-    builder.order.return_value = builder
+def _mock_connection(return_data=None, raises=None):
+    mock_conn = MagicMock()
 
     if raises:
-        builder.execute.side_effect = raises
+        mock_conn.execute.side_effect = raises
     else:
         result = MagicMock()
-        result.data = return_data
-        builder.execute.return_value = result
+        result.mappings.return_value.all.return_value = return_data or []
+        mock_conn.execute.return_value = result
 
-    mock_supabase.table.return_value = builder
-    return mock_supabase
+    return mock_conn
+
+
+def _patch_get_connection(mock_conn):
+    mock_get_connection = MagicMock()
+    mock_get_connection.return_value.__enter__.return_value = mock_conn
+    mock_get_connection.return_value.__exit__.return_value = False
+    return patch(
+        "app.services.history_user.history_service.get_connection",
+        mock_get_connection,
+    )
 
 
 # UT-01
 def test_history_list_sort_asc_and_desc():
     asc_data = sorted(SESSIONS, key=lambda s: s["analysis_date"])
-    mock_supabase_asc = _make_supabase_mock(asc_data)
+    mock_conn_asc = _mock_connection(asc_data)
 
-    result_asc = history_list(mock_supabase_asc, user_id=1, search_term=None, sort_order="asc")
+    with _patch_get_connection(mock_conn_asc):
+        result_asc = history_list(user_id=1, search_term=None, sort_order="asc")
 
     assert [s["analysis_date"] for s in result_asc] == [
         "2026-07-01T10:00:00",
@@ -44,9 +48,10 @@ def test_history_list_sort_asc_and_desc():
     ]
 
     desc_data = sorted(SESSIONS, key=lambda s: s["analysis_date"], reverse=True)
-    mock_supabase_desc = _make_supabase_mock(desc_data)
+    mock_conn_desc = _mock_connection(desc_data)
 
-    result_desc = history_list(mock_supabase_desc, user_id=1, search_term=None, sort_order="desc")
+    with _patch_get_connection(mock_conn_desc):
+        result_desc = history_list(user_id=1, search_term=None, sort_order="desc")
 
     assert [s["analysis_date"] for s in result_desc] == [
         "2026-07-20T10:00:00",
@@ -61,9 +66,10 @@ def test_history_list_search_term_filters_by_session_name():
         s for s in SESSIONS
         if "squat" in s["session_name"].lower()
     ]
-    mock_supabase = _make_supabase_mock(filtered_data)
+    mock_conn = _mock_connection(filtered_data)
 
-    result = history_list(mock_supabase, user_id=1, search_term="Squat", sort_order="desc")
+    with _patch_get_connection(mock_conn):
+        result = history_list(user_id=1, search_term="Squat", sort_order="desc")
 
     assert len(result) == 2
     names = [s["session_name"] for s in result]
@@ -74,9 +80,10 @@ def test_history_list_search_term_filters_by_session_name():
 
 # UT-03
 def test_history_list_raises_when_db_query_fails():
-    mock_supabase = _make_supabase_mock(raises=Exception("DB connection error"))
+    mock_conn = _mock_connection(raises=Exception("DB connection error"))
 
-    with pytest.raises(HistoryException) as exc_info:
-        history_list(mock_supabase, user_id=1, search_term=None, sort_order="desc")
+    with _patch_get_connection(mock_conn):
+        with pytest.raises(HistoryException) as exc_info:
+            history_list(user_id=1, search_term=None, sort_order="desc")
 
     assert str(exc_info.value) == "Couldn't load your history right now. Please try again."

@@ -1,10 +1,10 @@
 import io
-import os  # 💥 เพิ่ม import os ที่ขาดไป
+import os 
 import base64
 import math
 import uuid
 from app.services.frame_cache import store_keypoints
-from app.config.supabase_client import supabase
+from app.config.storage_client import upload_bytes, get_public_url
 from app.services.motion_analysis import (
     analyze_motion,
     extract_joint_angles,
@@ -38,7 +38,6 @@ from app.services.video_validation import (
 
 GRAPH_VISIBLE_RATIO = 0.95
 MAX_GRAPH_SAMPLES = 180
-SUPABASE_BUCKET_NAME = "AngleSync_Project"
 
 def _build_graph_samples(
         risk_scores,
@@ -137,6 +136,7 @@ def process_video_analysis(
                     "similarity_score": round(float(error.similarity_score), 2),
                     **error.details
                 },
+                "risk_frames": [],
                 "feedback": {
                     "form_summary": "This video does not match the selected reference exercise.",
                     "injury_risk": "Analysis was skipped because the movement is a different exercise.",
@@ -245,26 +245,22 @@ def process_video_analysis(
 
     img_bytes = img_byte_arr.getvalue()
     
-    # 💥 กำหนด Storage Path ใน Supabase (ใช้ filename ตรงๆ)
+    # 💥 กำหนด Storage Path ใน Garage (ใช้ filename ตรงๆ)
     storage_path = filename 
 
     highest_risk_image_url = ""
     if len(img_bytes) > 0:
         try:
-            supabase.storage.from_(SUPABASE_BUCKET_NAME).upload(
-                path=storage_path,
-                file=img_bytes,
-                file_options={"content-type": "image/jpeg", "upsert": "true"}
-            )
+            upload_bytes(storage_path, img_bytes, content_type="image/jpeg")
 
-            highest_risk_image_url = supabase.storage.from_(SUPABASE_BUCKET_NAME).get_public_url(storage_path)
-            print(f"[DEBUG] Supabase Direct Upload Success: {highest_risk_image_url}")
+            highest_risk_image_url = get_public_url(storage_path)
+            print(f"[DEBUG] Garage Direct Upload Success: {highest_risk_image_url}")
 
         except Exception as upload_err:
-            print(f"[ERROR] Failed to upload frame to Supabase: {upload_err}")
+            print(f"[ERROR] Failed to upload frame to Garage: {upload_err}")
             highest_risk_image_url = ""
     else:
-        print("[ERROR] img_bytes is empty. Skipping Supabase upload.")
+        print("[ERROR] img_bytes is empty. Skipping Garage upload.")
 
     report_progress(90, "generating_feedback", "Generating feedback...")
 
@@ -321,5 +317,16 @@ def process_video_analysis(
             "highest_risk_frame_index": graph_peak_index,
             "highest_risk_image_url": highest_risk_image_url,
         },
+        # single highest-risk frame, shaped for direct use as /save-analyze's risk_frames payload
+        "risk_frames": [
+            {
+                "frame_number": highest_frame_data["frame"],
+                "risk_percentage": round(float(highest_frame_data["risk_score"]), 2),
+                "skeleton_overlay_url": highest_risk_image_url,
+                "image": highest_risk_image_url,
+                "highest_risk_image_url": highest_risk_image_url,
+                "joint_coordinates": highest_frame_data.get("keypoints"),
+            }
+        ],
         "feedback": feedback
     }

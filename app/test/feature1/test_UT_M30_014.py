@@ -78,7 +78,8 @@ MOCK_FEEDBACK = {
 class TestProcessVideoAnalysis:
 
     # UT-M30-014
-    @patch("app.services.analysis_results.supabase")
+    @patch("app.services.analysis_results.get_public_url")
+    @patch("app.services.analysis_results.upload_bytes")
     @patch("app.services.analysis_results.verify_file_type")
     @patch(
         "app.services.analysis_results.verify_video_duration",
@@ -129,7 +130,8 @@ class TestProcessVideoAnalysis:
         mock_reference,
         mock_duration,
         mock_verify_type,
-        mock_supabase,
+        mock_upload_bytes,
+        mock_get_public_url,
     ):
         # save_highest_risk_frame returns a PIL-like object
         frame_image = MagicMock()
@@ -139,15 +141,10 @@ class TestProcessVideoAnalysis:
 
         mock_save_frame.return_value = frame_image
 
-        storage_mock = MagicMock()
-
-        storage_mock.upload.return_value = None
-        storage_mock.get_public_url.return_value = (
-            "https://test.supabase.co/storage/v1/object/public/"
-            "AngleSync_Project/highest_risk_frame_abc.jpg"
+        mock_get_public_url.return_value = (
+            "https://test.garage.example.com/my-bucket/"
+            "highest_risk_frame_abc.jpg"
         )
-
-        mock_supabase.storage.from_.return_value = storage_mock
 
         with patch(
             "app.services.analysis_results.uuid.uuid4"
@@ -161,8 +158,8 @@ class TestProcessVideoAnalysis:
             )
 
         expected_url = (
-            "https://test.supabase.co/storage/v1/object/public/"
-            "AngleSync_Project/highest_risk_frame_abc.jpg"
+            "https://test.garage.example.com/my-bucket/"
+            "highest_risk_frame_abc.jpg"
         )
 
         assert result["selected_frame"]["image"] == expected_url
@@ -172,8 +169,8 @@ class TestProcessVideoAnalysis:
             == expected_url
         )
 
-        storage_mock.upload.assert_called_once()
+        mock_upload_bytes.assert_called_once()
 
-        storage_mock.get_public_url.assert_called_once_with(
+        mock_get_public_url.assert_called_once_with(
             "highest_risk_frame_abc.jpg"
         )

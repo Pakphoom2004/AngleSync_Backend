@@ -7,12 +7,14 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="refactor error message assertions in unit tests for clarity and consistency">
+    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="add delete session endpoint and refactor history service response handling">
+      <change afterPath="$PROJECT_DIR$/app/config/auth_config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/exceptions/auth_exception.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/routes/auth_route.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/auth_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/history_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/history_route.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/admin/update_status.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/admin/update_status.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/history_user/history_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/history_user/history_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config/db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +63,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "dev",
+    "git-widget-placeholder": "authentication",
     "last_opened_file_path": "/Users/pakphoom/AngleSync_Backend"
   }
 }]]></component>
@@ -217,7 +219,15 @@
       <option name="project" value="LOCAL" />
       <updated>1786452139779</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="add delete session endpoint and refactor history service response handling">
+      <option name="closed" value="true" />
+      <created>1786850504696</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1786850504696</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -246,6 +256,17 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="refactor error message assertions in unit tests for consistency" />
     <MESSAGE value="refactor error message assertions in unit tests for clarity and consistency" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor error message assertions in unit tests for clarity and consistency" />
+    <MESSAGE value="add delete session endpoint and refactor history service response handling" />
+    <option name="LAST_COMMIT_MESSAGE" value="add delete session endpoint and refactor history service response handling" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/app/config/db.py</url>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

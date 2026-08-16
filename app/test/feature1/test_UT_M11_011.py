@@ -1,5 +1,4 @@
 import pytest
-from types import ModuleType
 from unittest.mock import MagicMock, patch
 
 from app.repository.reference_repository import get_reference_angles_from_db
@@ -39,46 +38,39 @@ MOCK_METRICS = [
 ]
 
 
-def _make_supabase_mock(
+def _mock_connection(
     reference_data=MOCK_REFERENCE,
     frames_data=MOCK_FRAMES,
     metrics_data=MOCK_METRICS
 ):
-    supabase = MagicMock()
+    mock_conn = MagicMock()
+    calls = {"n": 0}
 
-    def table_side_effect(table_name):
-        mock = MagicMock()
+    def execute_side_effect(stmt, params=None):
+        n = calls["n"]
+        calls["n"] += 1
 
-        if table_name == "exercise_reference":
-            mock.select.return_value.eq.return_value \
-                .limit.return_value.execute.return_value \
-                = MagicMock(data=reference_data)
+        result = MagicMock()
+        if n == 0:
+            result.mappings.return_value.all.return_value = reference_data
+        elif n == 1:
+            result.mappings.return_value.all.return_value = frames_data
+        else:
+            result.mappings.return_value.all.return_value = metrics_data
+        return result
 
-        elif table_name == "exercise_reference_frame_data":
-            mock.select.return_value.eq.return_value \
-                .order.return_value.execute.return_value \
-                = MagicMock(data=frames_data)
-
-        elif table_name == "exercise_reference_pose_metrics":
-            mock.select.return_value.in_.return_value \
-                .execute.return_value \
-                = MagicMock(data=metrics_data)
-
-        return mock
-
-    supabase.table.side_effect = table_side_effect
-    return supabase
+    mock_conn.execute.side_effect = execute_side_effect
+    return mock_conn
 
 
-def _patch_supabase_module(supabase):
-    module = ModuleType("app.config.supabase_client")
-    module.supabase = supabase
+def _patch_get_connection(mock_conn):
+    mock_get_connection = MagicMock()
+    mock_get_connection.return_value.__enter__.return_value = mock_conn
+    mock_get_connection.return_value.__exit__.return_value = False
 
-    return patch.dict(
-        "sys.modules",
-        {
-            "app.config.supabase_client": module
-        }
+    return patch(
+        "app.config.db.get_connection",
+        mock_get_connection,
     )
 
 
@@ -87,9 +79,9 @@ class TestGetReferenceAnglesFromDb:
     def test_returns_exercise_name_average_angles_and_angle_sequence(
         self
     ):
-        supabase = _make_supabase_mock()
+        mock_conn = _mock_connection()
 
-        with _patch_supabase_module(supabase):
+        with _patch_get_connection(mock_conn):
             result = get_reference_angles_from_db(1)
 
         assert result["exercise_name"] == "Squat_men"
@@ -100,9 +92,9 @@ class TestGetReferenceAnglesFromDb:
     def test_average_angles_correctly_calculated(
         self
     ):
-        supabase = _make_supabase_mock()
+        mock_conn = _mock_connection()
 
-        with _patch_supabase_module(supabase):
+        with _patch_get_connection(mock_conn):
             result = get_reference_angles_from_db(1)
 
         expected_left_hip = (163.9 + 164.3) / 2
@@ -111,9 +103,9 @@ class TestGetReferenceAnglesFromDb:
     def test_raises_value_error_when_no_frames_found(
         self
     ):
-        supabase = _make_supabase_mock(frames_data=[])
+        mock_conn = _mock_connection(frames_data=[])
 
-        with _patch_supabase_module(supabase):
+        with _patch_get_connection(mock_conn):
             with pytest.raises(ValueError) as exc_info:
                 get_reference_angles_from_db(999)
 
@@ -122,10 +114,11 @@ class TestGetReferenceAnglesFromDb:
     def test_raises_value_error_when_no_metrics_found(
         self
     ):
-        supabase = _make_supabase_mock(metrics_data=[])
+        mock_conn = _mock_connection(metrics_data=[])
 
-        with _patch_supabase_module(supabase):
+        with _patch_get_connection(mock_conn):
             with pytest.raises(ValueError) as exc_info:
                 get_reference_angles_from_db(1)
 
         assert "No metrics found for frame_ids=" in str(exc_info.value)
+

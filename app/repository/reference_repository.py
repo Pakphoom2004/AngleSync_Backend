@@ -1,52 +1,75 @@
 
 def get_reference_angles_from_db(reference_video_id: int) -> dict:
-    from app.config.supabase_client import supabase
+    from sqlalchemy import bindparam, text
 
-    reference = supabase.table("exercise_reference") \
-        .select("exercise_name") \
-        .eq("reference_video_id", reference_video_id) \
-        .limit(1) \
-        .execute()
+    from app.config.db import get_connection
 
-    exercise_name = ""
-    if reference.data:
-        exercise_name = reference.data[0].get("exercise_name") or ""
+    with get_connection() as conn:
+        reference = conn.execute(
+            text(
+                """
+                SELECT exercise_name
+                FROM exercise_reference
+                WHERE reference_video_id = :reference_video_id
+                LIMIT 1
+                """
+            ),
+            {"reference_video_id": reference_video_id},
+        ).mappings().all()
 
-    # step 1
-    frames = supabase.table("exercise_reference_frame_data") \
-        .select("reference_frame_id, frame_sequence") \
-        .eq("parent_video_id", reference_video_id) \
-        .order("frame_sequence") \
-        .execute()
+        exercise_name = ""
+        if reference:
+            exercise_name = reference[0].get("exercise_name") or ""
 
-    print(f"DEBUG reference_video_id: {reference_video_id}")
-    print(f"DEBUG frames found: {len(frames.data)}")
+        # step 1
+        frames = conn.execute(
+            text(
+                """
+                SELECT reference_frame_id, frame_sequence
+                FROM exercise_reference_frame_data
+                WHERE parent_video_id = :reference_video_id
+                ORDER BY frame_sequence
+                """
+            ),
+            {"reference_video_id": reference_video_id},
+        ).mappings().all()
 
-    if not frames.data:
-        raise ValueError(f"No frames found for reference_video_id={reference_video_id}")
+        print(f"DEBUG reference_video_id: {reference_video_id}")
+        print(f"DEBUG frames found: {len(frames)}")
 
-    frame_ids = [
-        f["reference_frame_id"]
-        for f in frames.data
-    ]
-    frame_order = {
-        f["reference_frame_id"]: index
-        for index, f in enumerate(frames.data)
-    }
+        if not frames:
+            raise ValueError(f"No frames found for reference_video_id={reference_video_id}")
 
-    # step 2
-    metrics = supabase.table("exercise_reference_pose_metrics") \
-        .select("related_frame_id, joint_angle_data") \
-        .in_("related_frame_id", frame_ids) \
-        .execute()
+        frame_ids = [
+            f["reference_frame_id"]
+            for f in frames
+        ]
+        frame_order = {
+            f["reference_frame_id"]: index
+            for index, f in enumerate(frames)
+        }
 
-    print(f"DEBUG metrics found: {len(metrics.data)}")
+        # step 2
+        metrics_stmt = text(
+            """
+            SELECT related_frame_id, joint_angle_data
+            FROM exercise_reference_pose_metrics
+            WHERE related_frame_id IN :frame_ids
+            """
+        ).bindparams(bindparam("frame_ids", expanding=True))
 
-    if not metrics.data:
+        metrics = conn.execute(
+            metrics_stmt,
+            {"frame_ids": frame_ids},
+        ).mappings().all()
+
+    print(f"DEBUG metrics found: {len(metrics)}")
+
+    if not metrics:
         raise ValueError(f"No metrics found for frame_ids={frame_ids[:5]}")
 
     sorted_metrics = sorted(
-        metrics.data,
+        metrics,
         key=lambda row: frame_order.get(
             row["related_frame_id"],
             0

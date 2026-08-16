@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from app.services.history_user.history_service import session_detail
 from app.exceptions.history_exception import HistoryException
 
@@ -21,64 +21,65 @@ FEEDBACK = {
 }
 
 
-def _make_supabase_mock(
-    session_data=None,
+def _mock_connection(
+    session_row=None,
     session_raises=None,
     risk_frames_data=None,
-    feedback_data=None,
+    feedback_row=None,
 ):
-    mock_supabase = MagicMock()
-    call_count = {"n": 0}
+    mock_conn = MagicMock()
+    calls = {"n": 0}
 
-    def table_side_effect(table_name):
-        builder = MagicMock()
-        builder.select.return_value = builder
-        builder.eq.return_value = builder
-        builder.limit.return_value = builder
-        builder.order.return_value = builder
+    def execute_side_effect(*args, **kwargs):
+        n = calls["n"]
+        calls["n"] += 1
 
-        n = call_count["n"]
-        call_count["n"] += 1
-
-        if table_name == "analysis_sessions" and n == 0:
+        if n == 0:
             if session_raises:
-                builder.execute.side_effect = session_raises
-            else:
-                result = MagicMock()
-                result.data = session_data
-                builder.execute.return_value = result
-
-        elif table_name == "risk_frames":
+                raise session_raises
             result = MagicMock()
-            result.data = risk_frames_data or []
-            builder.execute.return_value = result
+            result.mappings.return_value.first.return_value = session_row
+            return result
 
-        elif table_name == "feedbacks":
+        if n == 1:
             result = MagicMock()
-            result.data = feedback_data or []
-            builder.execute.return_value = result
+            result.mappings.return_value.all.return_value = risk_frames_data or []
+            return result
 
-        return builder
+        result = MagicMock()
+        result.mappings.return_value.first.return_value = feedback_row
+        return result
 
-    mock_supabase.table.side_effect = table_side_effect
-    return mock_supabase
+    mock_conn.execute.side_effect = execute_side_effect
+    return mock_conn
+
+
+def _patch_get_connection(mock_conn):
+    mock_get_connection = MagicMock()
+    mock_get_connection.return_value.__enter__.return_value = mock_conn
+    mock_get_connection.return_value.__exit__.return_value = False
+    return patch(
+        "app.services.history_user.history_service.get_connection",
+        mock_get_connection,
+    )
 
 
 # UT-01
 def test_session_detail_returns_full_detail_when_video_available():
-    session_data = [{
+    session_row = {
         "session_name": "Squat Session 1",
         "video_user_url": "https://storage.example.com/videos/squat.mp4",
         "accuracy_score": 87.5,
         "reference_video_id": 10,
-    }]
-    mock_supabase = _make_supabase_mock(
-        session_data=session_data,
+    }
+    mock_conn = _mock_connection(
+        session_row=session_row,
         risk_frames_data=[RISK_FRAME],
-        feedback_data=[FEEDBACK],
+        feedback_row=FEEDBACK,
     )
 
-    result = session_detail(mock_supabase, user_id=1, session_id=101)
+    with _patch_get_connection(mock_conn):
+        result = session_detail(user_id=1, session_id=101)
 
     assert result["session_id"] == 101
     assert result["session_name"] == "Squat Session 1"
@@ -91,19 +92,20 @@ def test_session_detail_returns_full_detail_when_video_available():
 
 # UT-02
 def test_session_detail_returns_placeholder_when_video_url_is_none():
-    session_data = [{
+    session_row = {
         "session_name": "Squat Session 2",
         "video_user_url": None,
         "accuracy_score": 72.0,
         "reference_video_id": 10,
-    }]
-    mock_supabase = _make_supabase_mock(
-        session_data=session_data,
+    }
+    mock_conn = _mock_connection(
+        session_row=session_row,
         risk_frames_data=[RISK_FRAME],
-        feedback_data=[FEEDBACK],
+        feedback_row=FEEDBACK,
     )
 
-    result = session_detail(mock_supabase, user_id=1, session_id=102)
+    with _patch_get_connection(mock_conn):
+        result = session_detail(user_id=1, session_id=102)
 
     assert result["session_name"] == "Squat Session 2"
     assert result["video_user_url"] == "Video not available."
@@ -115,11 +117,12 @@ def test_session_detail_returns_placeholder_when_video_url_is_none():
 
 # UT-03
 def test_session_detail_raises_when_db_query_fails():
-    mock_supabase = _make_supabase_mock(
+    mock_conn = _mock_connection(
         session_raises=Exception("DB connection error"),
     )
 
-    with pytest.raises(HistoryException) as exc_info:
-        session_detail(mock_supabase, user_id=1, session_id=101)
+    with _patch_get_connection(mock_conn):
+        with pytest.raises(HistoryException) as exc_info:
+            session_detail(user_id=1, session_id=101)
 
     assert str(exc_info.value) == "Couldn't load your history right now. Please try again."
