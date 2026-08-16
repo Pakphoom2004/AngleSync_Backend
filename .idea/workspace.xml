@@ -3,17 +3,16 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+  <component name="BackgroundAgentGlobalSettings">
+    <option name="selectedModelId" value="auto" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="refactor error message assertions in unit tests for consistency">
+    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="refactor error message assertions in unit tests for clarity and consistency">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/dashboard_service/test_dashboard_summary.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/dashboard_service/test_dashboard_summary.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M23_013.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M23_013.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/feature1/test_UT_M30_014.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/feature1/test_UT_M30_014.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/history_service/test_delete_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/history_service/test_delete_session.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/history_service/test_history_list.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/history_service/test_history_list.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/history_service/test_session_list.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/history_service/test_session_detail.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/save_analyze/test_save_analysis_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/save_analyze/test_save_analysis_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/test/update_status/test_update_user_status.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/update_status/test_update_user_status.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/history_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/history_route.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/admin/update_status.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/admin/update_status.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/history_user/history_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/history_user/history_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -210,7 +209,15 @@
       <option name="project" value="LOCAL" />
       <updated>1786450740491</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="refactor error message assertions in unit tests for clarity and consistency">
+      <option name="closed" value="true" />
+      <created>1786452139779</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1786452139779</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -238,6 +245,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="refactor error message assertions in unit tests for consistency" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor error message assertions in unit tests for consistency" />
+    <MESSAGE value="refactor error message assertions in unit tests for clarity and consistency" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor error message assertions in unit tests for clarity and consistency" />
   </component>
 </project>

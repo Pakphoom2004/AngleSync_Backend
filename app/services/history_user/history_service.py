@@ -28,16 +28,7 @@ def history_list(
     except Exception:
         raise HistoryException()
 
-    records = response.data or []
-
-    if not records:
-        if search_term:
-            raise HistoryException("No results found.")
-        raise HistoryException(
-            "No history yet. Start a Smart Scan to see your results here."
-        )
-
-    return records
+    return response.data or []
 
 
 def session_detail(

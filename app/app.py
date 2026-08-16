@@ -14,9 +14,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-os.makedirs("outputs", exist_ok=True)
-app.mount("/static", StaticFiles(directory="outputs"), name="static")
-os.makedirs("data/outputs", exist_ok=True)
 app.include_router(analysis_router)
 app.include_router(exercise_router)
 app.include_router(admin_router)

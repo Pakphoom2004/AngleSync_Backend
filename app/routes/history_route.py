@@ -4,6 +4,12 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.exceptions.history_exception import HistoryException
 from app.services.history_user.history_service import history_list, session_detail
+from app.services.history_user.history_service import (
+    history_list,
+    session_detail,
+    delete_session,
+)
+from app.exceptions.session_delete_failed_exception import SessionDeleteFailedException
 
 
 router = APIRouter()
@@ -46,3 +52,17 @@ async def get_session_detail(
         )
     except HistoryException as error:
         raise HTTPException(status_code=404, detail=str(error))
+
+@router.delete("/history/{session_id}")
+async def delete_history_session(
+    session_id: int,
+    user_id: int = Query(1),
+):
+    try:
+        return delete_session(
+            get_supabase_client(),
+            user_id=user_id,
+            session_id=session_id,
+        )
+    except SessionDeleteFailedException as error:
+        raise HTTPException(status_code=400, detail=str(error))

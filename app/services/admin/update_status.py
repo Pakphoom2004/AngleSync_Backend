@@ -17,8 +17,8 @@ def update_user_status(
     try:
         response = (
             supabase.table("users")
-            .update({"status": new_status})
-            .eq("id", target_user_id)
+            .update({"user_status": new_status})
+            .eq("user_id", target_user_id)
             .execute()
         )
     except Exception:
