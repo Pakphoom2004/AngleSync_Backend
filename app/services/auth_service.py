@@ -28,7 +28,7 @@ def verify_google_id_token(token: str) -> Dict[str, Any]:
         )
         return payload
     except ValueError:
-        raise AuthException("Invalid Google token.")
+        raise AuthException("Authentication failed.")
 
 
 def create_user_from_google(google_payload):
@@ -66,7 +66,7 @@ def create_user_from_google(google_payload):
 
 def complete_profile(user_id: int, gender: str) -> Dict[str, Any]:
     if gender not in ("Male", "Female"):
-        raise AuthException("Invalid gender value.")
+        raise AuthException("Failed to complete profile.")
 
     with get_connection() as conn:
         updated = conn.execute(
@@ -82,7 +82,7 @@ def complete_profile(user_id: int, gender: str) -> Dict[str, Any]:
         ).mappings().first()
 
         if not updated:
-            raise AuthException("User not found.")
+            raise AuthException("Failed to complete profile.")
 
         conn.commit()
         return dict(updated)
