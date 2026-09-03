@@ -1,9 +1,7 @@
 from typing import Literal, Optional
-
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 
 from app.exceptions.history_exception import HistoryException
-from app.services.history_user.history_service import history_list, session_detail
 from app.services.history_user.history_service import (
     history_list,
     session_detail,
@@ -11,15 +9,17 @@ from app.services.history_user.history_service import (
 )
 from app.exceptions.session_delete_failed_exception import SessionDeleteFailedException
 
+# ⬅️ Import get_current_user_id จากไฟล์ auth ข้างบนนี้
+from app.services.auth_service import get_current_user_id # ปรับ path ตามโครงสร้างโฟลเดอร์จริงของคุณ
 
 router = APIRouter()
 
 
 @router.get("/history")
 async def get_history(
-    user_id: int = Query(1),
     search_term: Optional[str] = Query(None),
     sort_order: Literal["asc", "desc"] = Query("desc"),
+    user_id: int = Depends(get_current_user_id), # ⬅️ ถอด user_id จาก Bearer token ให้อัตโนมัติ
 ):
     try:
         history = history_list(
@@ -35,7 +35,7 @@ async def get_history(
 @router.get("/history/{session_id}")
 async def get_session_detail(
     session_id: int,
-    user_id: int = Query(1),
+    user_id: int = Depends(get_current_user_id), # ⬅️ ถอด user_id จาก Bearer token
 ):
     try:
         return session_detail(
@@ -45,10 +45,11 @@ async def get_session_detail(
     except HistoryException as error:
         raise HTTPException(status_code=404, detail=str(error))
 
+
 @router.delete("/history/{session_id}")
 async def delete_history_session(
     session_id: int,
-    user_id: int = Query(1),
+    user_id: int = Depends(get_current_user_id), # ⬅️ ถอด user_id จาก Bearer token
 ):
     try:
         return delete_session(

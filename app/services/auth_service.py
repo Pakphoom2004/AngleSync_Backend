@@ -16,7 +16,10 @@ from app.config.auth_config import (
 )
 from app.config.db import get_connection
 from app.exceptions.auth_exception import AuthException
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+security = HTTPBearer()
 
 def verify_google_id_token(token: str) -> Dict[str, Any]:
     try:
@@ -98,3 +101,22 @@ def decode_access_token(token: str) -> int:
         return int(payload["sub"])
     except jwt.PyJWTError:
         raise AuthException("Invalid or expired token.")
+
+def get_user_by_id(user_id: int) -> Dict[str, Any] | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            text("SELECT * FROM users WHERE user_id = :user_id LIMIT 1"),
+            {"user_id": user_id},
+        ).mappings().first()
+        return dict(row) if row else None
+
+def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
+        try:
+            # credentials.credentials จะได้ค่า token จาก Header "Authorization: Bearer <token>"
+            return decode_access_token(credentials.credentials)
+        except AuthException as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=str(e),
+                headers={"WWW-Authenticate": "Bearer"},
+            )

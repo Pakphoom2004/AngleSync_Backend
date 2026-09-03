@@ -8,13 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="add delete session endpoint and refactor history service response handling">
-      <change afterPath="$PROJECT_DIR$/app/config/auth_config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/exceptions/auth_exception.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/auth_route.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/auth_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/config/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/auth_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/auth_route.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/history_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/history_route.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/auth_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/auth_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/save_analyze.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/save_analyze.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
