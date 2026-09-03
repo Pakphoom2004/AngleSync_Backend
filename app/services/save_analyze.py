@@ -88,7 +88,6 @@ def save_analysis_result(
 
             if risk_frames:
                 for frame in risk_frames:
-                    # 💥 เพิ่ม Key "highest_risk_image_url" และ "image" เพื่อรองรับ Payload จาก Flutter
                     skeleton_overlay_url = _first_present(
                         frame,
                         "highest_risk_image_url",

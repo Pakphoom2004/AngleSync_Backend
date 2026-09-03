@@ -7,6 +7,7 @@ from app.services.auth_service import (
     create_access_token,
     create_user_from_google,
     decode_access_token,
+    get_user_by_id,
     verify_google_id_token,
 )
 
@@ -36,17 +37,35 @@ async def login_with_google(payload: GoogleLoginRequest):
     try:
         google_payload = verify_google_id_token(payload.id_token)
         user = create_user_from_google(google_payload)
-        access_token = create_access_token(user["user_id"])   # ⬅️ เอา ._mapping ออก
+        access_token = create_access_token(user["user_id"])
 
         return {
             "access_token": access_token,
-            "user_id": user["user_id"],       # ⬅️ เอา ._mapping ออก
-            "username": user["username"],     # ⬅️ เอา ._mapping ออก
-            "email": user["email"],           # ⬅️ เอา ._mapping ออก
+            "user_id": user["user_id"],
+            "username": user["username"],
+            "email": user["email"],
+            "user_role": user["user_role"],
+            "gender": user.get("gender"),
             "needs_gender": user.get("gender") is None,
         }
     except AuthException as error:
         raise HTTPException(status_code=401, detail=str(error))
+
+
+@router.get("/me")
+async def get_current_user(user_id: int = Depends(get_current_user_id)):
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found.")
+
+    return {
+        "user_id": user["user_id"],
+        "username": user["username"],
+        "email": user["email"],
+        "user_role": user["user_role"],
+        "gender": user.get("gender"),
+        "needs_gender": user.get("gender") is None,
+    }
 
 
 @router.post("/complete-profile")
