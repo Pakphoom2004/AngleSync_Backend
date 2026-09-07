@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Header, HTTPException
+from typing import Optional
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel
 
 from app.exceptions.auth_exception import AuthException
@@ -7,8 +8,9 @@ from app.services.auth_service import (
     create_access_token,
     create_user_from_google,
     decode_access_token,
-    get_user_by_id,
+    user_by_id,
     verify_google_id_token,
+    get_current_user_id,
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -19,17 +21,7 @@ class GoogleLoginRequest(BaseModel):
 
 
 class CompleteProfileRequest(BaseModel):
-    gender: str
-
-
-def get_current_user_id(authorization: str = Header(...)) -> int:
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid bearer token scheme.")
-    token = authorization.removeprefix("Bearer ").strip()
-    try:
-        return decode_access_token(token)
-    except AuthException as error:
-        raise HTTPException(status_code=401, detail=str(error))
+    gender: Optional[str] = "Unspecified" # รองรับ Optional และ Default เป็น Unspecified
 
 
 @router.post("/google")
@@ -46,27 +38,44 @@ async def login_with_google(payload: GoogleLoginRequest):
             "email": user["email"],
             "user_role": user["user_role"],
             "gender": user.get("gender"),
+            # ถ้า gender เป็น None ให้ถือว่าต้องระบุโปรไฟล์ก่อน
             "needs_gender": user.get("gender") is None,
         }
     except AuthException as error:
-        raise HTTPException(status_code=401, detail=str(error))
-
+        if "suspended" in str(error).lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=str(error),
+            )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error)
+        )
 
 @router.get("/me")
 async def get_current_user(user_id: int = Depends(get_current_user_id)):
-    user = get_user_by_id(user_id)
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found.")
+    try:
+        user = user_by_id(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found."
+            )
 
-    return {
-        "user_id": user["user_id"],
-        "username": user["username"],
-        "email": user["email"],
-        "user_role": user["user_role"],
-        "gender": user.get("gender"),
-        "needs_gender": user.get("gender") is None,
-    }
-
+        return {
+            "user_id": user["user_id"],
+            "username": user["username"],
+            "email": user["email"],
+            "user_role": user["user_role"],
+            "gender": user.get("gender"),
+            "needs_gender": user.get("gender") is None,
+        }
+    except AuthException as error:
+        if "suspended" in str(error).lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail=str(error)
+            )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error)
+        )
 
 @router.post("/complete-profile")
 async def complete_profile_route(
@@ -74,10 +83,13 @@ async def complete_profile_route(
     user_id: int = Depends(get_current_user_id),
 ):
     try:
-        user = complete_profile(user_id, payload.gender)
+        gender_value = payload.gender if payload.gender else "Unspecified"
+        user = complete_profile(user_id, gender_value)
         return {
             "user_id": user["user_id"],
             "gender": user["gender"],
         }
     except AuthException as error:
-        raise HTTPException(status_code=400, detail=str(error))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)
+        )

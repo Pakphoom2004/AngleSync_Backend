@@ -56,7 +56,7 @@ def test_complete_profile_invalid_gender():
     with pytest.raises(AuthException) as exc_info:
         complete_profile(user_id=1, gender="Other")
 
-    assert str(exc_info.value) == "Failed to complete profile."
+    assert str(exc_info.value) == "Unable to save your selection. Please try again."
 
 
 @patch("app.services.auth_service.get_connection")
@@ -68,4 +68,4 @@ def test_complete_profile_user_not_found(mock_get_connection):
     with pytest.raises(AuthException) as exc_info:
         complete_profile(user_id=0, gender="Male")
 
-    assert str(exc_info.value) == "Failed to complete profile."
+    assert str(exc_info.value) == "Unable to save your selection. Please try again."

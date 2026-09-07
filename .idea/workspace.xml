@@ -8,12 +8,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="add delete session endpoint and refactor history service response handling">
-      <change afterPath="$PROJECT_DIR$/app/test/authentication_service/test_complete_profile.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/test/authentication_service/test_create_access_token.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/test/authentication_service/test_create_user_from_google.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/test/authentication_service/test_verify_google_id_token.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/test/authentication_service/test _user_by_id.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/admin_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/admin_route.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/auth_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/auth_route.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/exercise_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/exercise_route.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/auth_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/auth_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/authentication_service/test_complete_profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/authentication_service/test_complete_profile.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/authentication_service/test_create_access_token.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/authentication_service/test_create_access_token.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,15 +47,19 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests for app.test.authentication_service.test_create_access_token.test_create_access_token_expiration_one_hour.executor": "Run",
     "Python tests.Python tests in dashboard_service.executor": "Run",
     "Python tests.Python tests in feature1.executor": "Run",
+    "Python tests.Python tests in test _user_by_id.py.executor": "Run",
     "Python tests.Python tests in test.executor": "Run",
     "Python tests.Python tests in test_UT_M12_013.py.executor": "Run",
     "Python tests.Python tests in test_UT_M17_013.py.executor": "Run",
     "Python tests.Python tests in test_UT_M20_013.py.executor": "Run",
     "Python tests.Python tests in test_UT_M23_014.py.executor": "Run",
     "Python tests.Python tests in test_complete_profile.py.executor": "Run",
+    "Python tests.Python tests in test_create_access_token.py.executor": "Run",
     "Python tests.Python tests in test_create_user_from_google.py.executor": "Run",
+    "Python tests.Python tests in test_decode_access_token.py.executor": "Run",
     "Python tests.Python tests in test_session_list.py.executor": "Run",
     "Python tests.Python tests in test_verify_google_id_token.py.executor": "Run",
     "Python.app.executor": "Run",
@@ -82,7 +88,7 @@
       <recent name="$PROJECT_DIR$/assets" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Python tests in test">
+  <component name="RunManager" selected="Python tests.Python tests in test_complete_profile.py">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
@@ -103,6 +109,36 @@
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for app.test.authentication_service.test_create_access_token.test_create_access_token_expiration_one_hour" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="AngleSync_Backend" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;app.test.authentication_service.test_create_access_token.test_create_access_token_expiration_one_hour&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test _user_by_id.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="AngleSync_Backend" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/authentication_service/test _user_by_id.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <configuration name="Python tests in test" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
@@ -135,36 +171,6 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in test_create_access_token.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="AngleSync_Backend" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/authentication_service/test_create_access_token.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Python tests in test_create_user_from_google.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="AngleSync_Backend" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/authentication_service/test_create_user_from_google.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method v="2" />
-    </configuration>
     <configuration name="Python tests in test_decode_access_token.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
@@ -182,11 +188,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Python tests in test_complete_profile.py" />
+        <item itemvalue="Python tests.Python tests in test _user_by_id.py" />
+        <item itemvalue="Python tests.Python tests for app.test.authentication_service.test_create_access_token.test_create_access_token_expiration_one_hour" />
         <item itemvalue="Python tests.Python tests in test" />
         <item itemvalue="Python tests.Python tests in test_decode_access_token.py" />
-        <item itemvalue="Python tests.Python tests in test_create_access_token.py" />
-        <item itemvalue="Python tests.Python tests in test_complete_profile.py" />
-        <item itemvalue="Python tests.Python tests in test_create_user_from_google.py" />
       </list>
     </recent_temporary>
   </component>

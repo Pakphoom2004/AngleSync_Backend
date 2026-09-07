@@ -58,5 +58,5 @@ async def post_update_user_status(payload: UpdateUserStatusRequest):
         )
     except StatusUpdateFailedException as error:
         raise HTTPException(status_code=400, detail=str(error))
-    except StatusUpdateFailedException as error:
-        raise HTTPException(status_code=500, detail=str(error))
+    except Exception as error:
+        raise HTTPException(status_code=500, detail="Internal server error")
