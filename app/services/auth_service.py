@@ -32,6 +32,12 @@ def verify_google_id_token(token: str) -> Dict[str, Any]:
     except ValueError:
         raise AuthException("Authentication failed.")
 
+def create_access_token(user_id: int) -> str:
+    expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
+        minutes=JWT_EXPIRE_MINUTES
+    )
+    payload = {"sub": str(user_id), "exp": expire}
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 def create_user_from_google(google_payload):
     email = google_payload.get("email")
@@ -68,6 +74,25 @@ def create_user_from_google(google_payload):
 
         return inserted
 
+def decode_access_token(token: str) -> int:
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return int(payload["sub"])
+    except jwt.PyJWTError:
+        raise AuthException("Invalid or expired token.")
+
+def user_by_id(user_id: int) -> Dict[str, Any] | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            text("SELECT * FROM users WHERE user_id = :user_id LIMIT 1"),
+            {"user_id": user_id},
+        ).mappings().first()
+        if row and row.get("user_status") != "Active":
+            raise AuthException(
+                "Your account has been suspended. Please contact support for assistance."
+            )
+        return dict(row) if row else None
+
 def complete_profile(user_id: int, gender: str) -> Dict[str, Any]:
     if gender not in ("Male", "Female", "Unspecified"):
         raise AuthException("Unable to save your selection. Please try again.")
@@ -90,34 +115,6 @@ def complete_profile(user_id: int, gender: str) -> Dict[str, Any]:
 
         conn.commit()
         return dict(updated)
-
-
-def create_access_token(user_id: int) -> str:
-    expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
-        minutes=JWT_EXPIRE_MINUTES
-    )
-    payload = {"sub": str(user_id), "exp": expire}
-    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
-
-def decode_access_token(token: str) -> int:
-    try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        return int(payload["sub"])
-    except jwt.PyJWTError:
-        raise AuthException("Invalid or expired token.")
-
-def user_by_id(user_id: int) -> Dict[str, Any] | None:
-    with get_connection() as conn:
-        row = conn.execute(
-            text("SELECT * FROM users WHERE user_id = :user_id LIMIT 1"),
-            {"user_id": user_id},
-        ).mappings().first()
-        if row and row.get("user_status") != "Active":
-            raise AuthException(
-                "Your account has been suspended. Please contact support for assistance."
-            )
-        return dict(row) if row else None
-
 
 def get_current_user_id(authorization: str = Header(...)) -> int:
     if not authorization.startswith("Bearer "):
