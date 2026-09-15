@@ -2,6 +2,9 @@ import pytest
 from unittest.mock import MagicMock, patch
 from app.services.admin.update_status import update_user_status
 from app.exceptions.status_update_failed_exception import StatusUpdateFailedException
+from app.exceptions.self_status_update_not_allowed_exception import (
+    SelfStatusUpdateNotAllowedException,
+)
 
 
 def _mock_connection(updated_rows=None, raises=None):
@@ -27,8 +30,8 @@ def _patch_get_connection(mock_conn):
     )
 
 
-# UT-01
-def test_update_user_status_success():
+# UT-M35-01
+def test_update_user_status_success_deactivate():
     mock_conn = _mock_connection(
         updated_rows=[{"user_id": 5}]
     )
@@ -44,23 +47,40 @@ def test_update_user_status_success():
     assert result["message"] == "User status updated successfully."
 
 
-# UT-02
+# UT-M35-02
+def test_update_user_status_success_activate():
+    mock_conn = _mock_connection(
+        updated_rows=[{"user_id": 5}]
+    )
+
+    with _patch_get_connection(mock_conn):
+        result = update_user_status(
+            user_id=1,
+            target_user_id=5,
+            new_status="Active",
+        )
+
+    assert result["success"] is True
+    assert result["message"] == "User status updated successfully."
+
+
+# UT-M35-03
 def test_update_user_status_raises_when_admin_deactivates_self():
     mock_conn = _mock_connection()
 
     with _patch_get_connection(mock_conn):
-        with pytest.raises(StatusUpdateFailedException) as exc_info:
+        with pytest.raises(SelfStatusUpdateNotAllowedException) as exc_info:
             update_user_status(
                 user_id=1,
                 target_user_id=1,
                 new_status="Inactive",
             )
 
-    assert str(exc_info.value) == "Unable to update user status. Please try again."
+    assert str(exc_info.value) == "You cannot deactivate your own account."
     mock_conn.execute.assert_not_called()
 
 
-# UT-03
+# UT-M35-04
 def test_update_user_status_raises_when_db_update_fails():
     mock_conn = _mock_connection(
         raises=Exception("DB connection error")

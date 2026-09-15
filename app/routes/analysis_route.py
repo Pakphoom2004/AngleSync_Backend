@@ -11,7 +11,7 @@ import queue
 import shutil
 import threading
 
-from app.exceptions.save_transaction_failed_exception import SaveTransactionFailedException
+from app.exceptions.save_session_failed_exception import SaveSessionFailedException
 from app.services.analysis_results import process_video_analysis
 from app.services.save_analyze import save_analysis_result, logger
 
@@ -143,7 +143,7 @@ async def save_analyze(payload: SaveAnalyzeRequest):
         return save_analysis_result(
             **payload_data
         )
-    except SaveTransactionFailedException as error:
+    except SaveSessionFailedException as error:
         raise HTTPException(
             status_code=500,
             detail=str(error)

@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from app.services.admin.dashboard_service import dashboard_summary
 from app.exceptions.unauthorized_access_exception import UnauthorizedAccessException
+from app.exceptions.data_load_exception import DataLoadException
 
 ADMINISTRATOR_ROLE = "Admin"
 
@@ -50,7 +51,7 @@ def _patch_get_connection(mock_conn):
     )
 
 
-# UT-01
+# UT-M33-01
 def test_dashboard_summary_returns_correct_counts():
     mock_conn = _mock_connection(
         user_role=ADMINISTRATOR_ROLE,
@@ -65,7 +66,7 @@ def test_dashboard_summary_returns_correct_counts():
     assert result["total_analysis_sessions"] == 120
 
 
-# UT-02
+# UT-M33-02
 def test_dashboard_summary_returns_zero_when_no_data():
     mock_conn = _mock_connection(
         user_role=ADMINISTRATOR_ROLE,
@@ -80,7 +81,7 @@ def test_dashboard_summary_returns_zero_when_no_data():
     assert result["total_analysis_sessions"] == 0
 
 
-# UT-03
+# UT-M33-03
 def test_dashboard_summary_raises_when_user_is_not_admin():
     mock_conn = _mock_connection(
         user_role="Member",
@@ -90,10 +91,10 @@ def test_dashboard_summary_raises_when_user_is_not_admin():
         with pytest.raises(UnauthorizedAccessException) as exc_info:
             dashboard_summary(user_id=2)
 
-    assert str(exc_info.value) == "Unable to process your request. Please try again."
+    assert str(exc_info.value) == "You do not have permission to view this page."
 
 
-# UT-04
+# UT-M33-04
 def test_dashboard_summary_raises_when_count_query_fails():
     mock_conn = _mock_connection(
         user_role=ADMINISTRATOR_ROLE,
@@ -101,7 +102,7 @@ def test_dashboard_summary_raises_when_count_query_fails():
     )
 
     with _patch_get_connection(mock_conn):
-        with pytest.raises(UnauthorizedAccessException) as exc_info:
+        with pytest.raises(DataLoadException) as exc_info:
             dashboard_summary(user_id=1)
 
-    assert str(exc_info.value) == "Unable to process your request. Please try again."
+    assert str(exc_info.value) == "Unable to load data. Please try again."

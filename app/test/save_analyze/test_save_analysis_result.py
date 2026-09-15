@@ -1,7 +1,9 @@
-import pytest
+from datetime import datetime
 from unittest.mock import MagicMock, patch
+import pytest
+
 from app.services.save_analyze import save_analysis_result
-from app.exceptions.save_transaction_failed_exception import SaveTransactionFailedException
+from app.exceptions.save_session_failed_exception import SaveSessionFailedException
 
 USER_ID = 1
 SESSION_NAME = "Squat Session 1"
@@ -85,7 +87,7 @@ def _patch_get_connection(mock_conn):
     )
 
 
-# UT-01
+# UT-M32-01
 def test_save_analysis_result_success():
     mock_conn = _mock_connection(
         session_result={"session_id": 42},
@@ -109,14 +111,46 @@ def test_save_analysis_result_success():
     assert result["session_name"] == SESSION_NAME
 
 
-# UT-02
+# UT-M32-02
+@pytest.mark.parametrize(
+    "input_session_name",
+    ["", "   ", None],
+)
+@patch("app.services.save_analyze.datetime")
+def test_save_analysis_result_uses_default_name_when_session_name_blank(mock_datetime, input_session_name):
+    fixed_now = datetime(2026, 9, 11, 14, 30, 25)
+    mock_datetime.now.return_value = fixed_now
+
+    mock_conn = _mock_connection(
+        session_result={"session_id": 42},
+        risk_frame_results=[{"frame_id": 1}],
+        feedback_result={"feedback_id": 1},
+    )
+
+    with _patch_get_connection(mock_conn):
+        result = save_analysis_result(
+            user_id=USER_ID,
+            session_name=input_session_name,
+            reference_video_id=REFERENCE_VIDEO_ID,
+            video_user_url=VIDEO_USER_URL,
+            accuracy_score=ACCURACY_SCORE,
+            risk_frames=RISK_FRAMES,
+            feedback=FEEDBACK_SIMPLE,
+        )
+
+    assert result["success"] is True
+    assert result["session_id"] == 42
+    assert result["session_name"] == "Session_20260911_143025"
+
+
+# UT-M32-03
 def test_save_analysis_result_raises_when_session_insert_fails():
     mock_conn = _mock_connection(
         session_raises=Exception("DB connection error"),
     )
 
     with _patch_get_connection(mock_conn):
-        with pytest.raises(SaveTransactionFailedException) as exc_info:
+        with pytest.raises(SaveSessionFailedException) as exc_info:
             save_analysis_result(
                 user_id=USER_ID,
                 session_name=SESSION_NAME,
@@ -130,7 +164,7 @@ def test_save_analysis_result_raises_when_session_insert_fails():
     assert str(exc_info.value) == "Unable to save result. Please try again."
 
 
-# UT-03
+# UT-M32-04
 def test_save_analysis_result_raises_and_cleans_up_when_risk_frames_insert_fails():
     mock_conn = _mock_connection(
         session_result={"session_id": 42},
@@ -138,7 +172,7 @@ def test_save_analysis_result_raises_and_cleans_up_when_risk_frames_insert_fails
     )
 
     with _patch_get_connection(mock_conn):
-        with pytest.raises(SaveTransactionFailedException) as exc_info:
+        with pytest.raises(SaveSessionFailedException) as exc_info:
             save_analysis_result(
                 user_id=USER_ID,
                 session_name=SESSION_NAME,
@@ -152,14 +186,14 @@ def test_save_analysis_result_raises_and_cleans_up_when_risk_frames_insert_fails
     assert str(exc_info.value) == "Unable to save result. Please try again."
 
 
-# UT-04
+# UT-M32-05
 def test_save_analysis_result_raises_when_foreign_key_invalid():
     mock_conn = _mock_connection(
         session_raises=Exception("FK constraint violation: user_id not found"),
     )
 
     with _patch_get_connection(mock_conn):
-        with pytest.raises(SaveTransactionFailedException) as exc_info:
+        with pytest.raises(SaveSessionFailedException) as exc_info:
             save_analysis_result(
                 user_id=99999,
                 session_name=SESSION_NAME,

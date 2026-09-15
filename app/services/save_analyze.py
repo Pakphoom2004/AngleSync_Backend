@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+from datetime import datetime
 from typing import Any, Dict, List
 
 
@@ -9,10 +10,13 @@ from sqlalchemy import bindparam, text
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.config.db import get_connection
-from app.exceptions.save_transaction_failed_exception import SaveTransactionFailedException
+from app.exceptions.save_session_failed_exception import SaveSessionFailedException
 from app.services.frame_cache import get_keypoints
 
 logger = logging.getLogger(__name__)
+
+def _generate_default_session_name() -> str:
+    return datetime.now().strftime("Session_%Y%m%d_%H%M%S")
 
 
 def _first_present(data: Dict[str, Any], *keys: str) -> Any:
@@ -56,7 +60,11 @@ def save_analysis_result(
     risk_frames: List[Dict[str, Any]],
     feedback: Dict[str, Any],
 ) -> Dict[str, Any]:
-
+    session_name = (
+        session_name.strip()
+        if session_name and session_name.strip()
+        else _generate_default_session_name()
+    )
     session_id = None
 
     try:
@@ -82,7 +90,7 @@ def save_analysis_result(
 
             session_row = session_result.mappings().first()
             if not session_row:
-                raise SaveTransactionFailedException()
+                raise SaveSessionFailedException()
 
             session_id = session_row["session_id"]
 
@@ -124,7 +132,7 @@ def save_analysis_result(
                     )
 
                     if not risk_frame_result.mappings().first():
-                        raise SaveTransactionFailedException()
+                        raise SaveSessionFailedException()
 
             feedback_result = conn.execute(
                 text(
@@ -146,7 +154,7 @@ def save_analysis_result(
             )
 
             if not feedback_result.mappings().first():
-                raise SaveTransactionFailedException()
+                raise SaveSessionFailedException()
 
         return {
             "success": True,
@@ -154,13 +162,13 @@ def save_analysis_result(
             "session_name": session_name,
         }
 
-    except SaveTransactionFailedException:
+    except SaveSessionFailedException:
         _cleanup_partial_save(session_id)
         raise
     except Exception:
         logger.exception("Failed to save analysis result")
         _cleanup_partial_save(session_id)
-        raise SaveTransactionFailedException()
+        raise SaveSessionFailedException()
 
 
 def _cleanup_partial_save(session_id: int) -> None:

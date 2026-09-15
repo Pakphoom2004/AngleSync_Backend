@@ -1,4 +1,4 @@
-class SaveTransactionFailedException(Exception):
+class SaveSessionFailedException(Exception):
 
     def __init__(
             self,
