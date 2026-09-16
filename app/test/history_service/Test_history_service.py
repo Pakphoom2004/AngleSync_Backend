@@ -148,13 +148,29 @@ class TestFilterAndSortHistoryByDate:
         assert result[0]["analysis_date"] == "2026-07-01"
 
     @patch('app.services.history_user.history_service.get_connection')
+    def test_filter_returns_empty_when_no_records_found(self, mock_get_connection):
+        # UT-03-03: Verify empty result when no records match the selected date range (B2-B4)
+        mock_conn = MagicMock()
+        mock_get_connection.return_value.__enter__.return_value = mock_conn
+
+        mock_conn.execute.return_value.mappings.return_value.all.return_value = []
+
+        result = filter_and_sort_history_by_date(
+            user_id=1,
+            sort_order="desc",
+            start_date=date(2026, 7, 1),
+            end_date=date(2026, 7, 15),
+        )
+
+        assert result == []
+
+    @patch('app.services.history_user.history_service.get_connection')
     def test_filter_and_sort_exception(self, mock_get_connection):
-        # UT-03-03: Verify DB exception
+        # UT-03-04: Verify DB exception
         mock_get_connection.side_effect = Exception("DB error")
 
         with pytest.raises(HistoryException):
             filter_and_sort_history_by_date(user_id=1, sort_order="desc", start_date=date(2026, 7, 1))
-
 
 # ==========================================
 # UT-04: session_detail

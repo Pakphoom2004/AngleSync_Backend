@@ -7,16 +7,24 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="add get current user endpoint and refactor user ID retrieval in history routes">
-      <change afterPath="$PROJECT_DIR$/app/services/history_user/__init__.py" afterDir="false" />
+    <list default="true" id="e21e9a30-c598-4c06-954c-bb840ce9afc2" name="Changes" comment="refactor error message assertions in unit tests for clarity and consistency">
+      <change afterPath="$PROJECT_DIR$/app/exceptions/data_load_exception.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/exceptions/self_status_update_not_allowed_exception.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/app/test/history_service/Test_history_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/history_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/history_route.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/auth_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/auth_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/exceptions/save_transaction_failed_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/exceptions/save_session_failed_exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/exceptions/unauthorized_access_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/exceptions/unauthorized_access_exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/analysis_route.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/analysis_route.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/admin/dashboard_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/admin/dashboard_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/admin/update_status.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/admin/update_status.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/history_user/history_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/history_user/history_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/save_analyze.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/save_analyze.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/dashboard_service/test_dashboard_summary.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/dashboard_service/test_dashboard_summary.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/test/history_service/test_delete_session.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/test/history_service/test_history_list.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/test/history_service/test_session_detail.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/save_analyze/test_save_analysis_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/save_analyze/test_save_analysis_result.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/test/update_status/test_update_user_status.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/test/update_status/test_update_user_status.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,22 +56,18 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python tests.Python tests for app.test.authentication_service.test_create_access_token.test_create_access_token_expiration_one_hour.executor": "Run",
     "Python tests.Python tests in Test_history_service.py.executor": "Run",
     "Python tests.Python tests in dashboard_service.executor": "Run",
     "Python tests.Python tests in feature1.executor": "Run",
-    "Python tests.Python tests in test _user_by_id.py.executor": "Run",
     "Python tests.Python tests in test.executor": "Run",
     "Python tests.Python tests in test_UT_M12_013.py.executor": "Run",
     "Python tests.Python tests in test_UT_M17_013.py.executor": "Run",
     "Python tests.Python tests in test_UT_M20_013.py.executor": "Run",
     "Python tests.Python tests in test_UT_M23_014.py.executor": "Run",
-    "Python tests.Python tests in test_complete_profile.py.executor": "Run",
-    "Python tests.Python tests in test_create_access_token.py.executor": "Run",
-    "Python tests.Python tests in test_create_user_from_google.py.executor": "Run",
-    "Python tests.Python tests in test_decode_access_token.py.executor": "Run",
+    "Python tests.Python tests in test_dashboard_summary.py.executor": "Run",
+    "Python tests.Python tests in test_save_analysis_result.py.executor": "Run",
     "Python tests.Python tests in test_session_list.py.executor": "Run",
-    "Python tests.Python tests in test_verify_google_id_token.py.executor": "Run",
+    "Python tests.Python tests in test_update_user_status.py.executor": "Run",
     "Python.app.executor": "Run",
     "Python.feedback_service.executor": "Run",
     "Python.main.executor": "Run",
@@ -73,7 +77,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "dev",
+    "git-widget-placeholder": "tranform-db",
     "last_opened_file_path": "/Users/pakphoom/AngleSync_Backend"
   }
 }]]></component>
@@ -90,7 +94,7 @@
       <recent name="$PROJECT_DIR$/assets" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Python tests in Test_history_service.py">
+  <component name="RunManager" selected="Python tests.Python tests in test_update_user_status.py">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
@@ -113,21 +117,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests for app.test.authentication_service.test_create_access_token.test_create_access_token_expiration_one_hour" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="AngleSync_Backend" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;app.test.authentication_service.test_create_access_token.test_create_access_token_expiration_one_hour&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <configuration name="Python tests in Test_history_service.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
@@ -140,21 +129,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/history_service/Test_history_service.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Python tests in test _user_by_id.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="AngleSync_Backend" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/authentication_service/test _user_by_id.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
@@ -173,7 +147,7 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in test_complete_profile.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in test_dashboard_summary.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="AngleSync_Backend" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -184,17 +158,47 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/authentication_service/test_complete_profile.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/dashboard_service/test_dashboard_summary.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_save_analysis_result.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="AngleSync_Backend" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/save_analyze/test_save_analysis_result.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_update_user_status.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="AngleSync_Backend" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/app/test/update_status/test_update_user_status.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Python tests in test_update_user_status.py" />
+        <item itemvalue="Python tests.Python tests in test_save_analysis_result.py" />
         <item itemvalue="Python tests.Python tests in Test_history_service.py" />
         <item itemvalue="Python tests.Python tests in test" />
-        <item itemvalue="Python tests.Python tests in test_complete_profile.py" />
-        <item itemvalue="Python tests.Python tests in test _user_by_id.py" />
-        <item itemvalue="Python tests.Python tests for app.test.authentication_service.test_create_access_token.test_create_access_token_expiration_one_hour" />
+        <item itemvalue="Python tests.Python tests in test_dashboard_summary.py" />
       </list>
     </recent_temporary>
   </component>
@@ -229,23 +233,7 @@
       <option name="project" value="LOCAL" />
       <updated>1786452139779</updated>
     </task>
-    <task id="LOCAL-00003" summary="add delete session endpoint and refactor history service response handling">
-      <option name="closed" value="true" />
-      <created>1786850504696</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1786850504696</updated>
-    </task>
-    <task id="LOCAL-00004" summary="add get current user endpoint and refactor user ID retrieval in history routes">
-      <option name="closed" value="true" />
-      <created>1788762548526</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1788762548526</updated>
-    </task>
-    <option name="localTasksCounter" value="5" />
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -274,16 +262,14 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="refactor error message assertions in unit tests for consistency" />
     <MESSAGE value="refactor error message assertions in unit tests for clarity and consistency" />
-    <MESSAGE value="add delete session endpoint and refactor history service response handling" />
-    <MESSAGE value="add get current user endpoint and refactor user ID retrieval in history routes" />
-    <option name="LAST_COMMIT_MESSAGE" value="add get current user endpoint and refactor user ID retrieval in history routes" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor error message assertions in unit tests for clarity and consistency" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/config/db.py</url>
-          <option name="timeStamp" value="3" />
+          <url>file://$PROJECT_DIR$/app/test/dashboard_service/test_dashboard_summary.py</url>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -4,7 +4,7 @@ from sqlalchemy import text
 
 from app.config.db import get_connection
 from app.exceptions.status_update_failed_exception import StatusUpdateFailedException
-
+from app.exceptions.self_status_update_not_allowed_exception import SelfStatusUpdateNotAllowedException
 
 def update_user_status(
     user_id: int,
@@ -12,7 +12,7 @@ def update_user_status(
     new_status: str,
 ) -> Dict[str, object]:
     if user_id == target_user_id:
-        raise StatusUpdateFailedException()
+        raise SelfStatusUpdateNotAllowedException()
 
     try:
         with get_connection() as conn:
