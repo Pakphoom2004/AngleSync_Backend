@@ -32,6 +32,8 @@ async def get_sessions(
     try:
         sessions = session_list(user_id, sort_order, filter_date)
         return {"sessions": sessions}
+    except UnauthorizedAccessException as error:
+        raise HTTPException(status_code=403, detail=str(error))
     except SessionNotFoundException as error:
         raise HTTPException(status_code=404, detail=str(error))
 

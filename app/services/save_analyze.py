@@ -5,7 +5,6 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List
 
-
 from sqlalchemy import bindparam, text
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -14,6 +13,8 @@ from app.exceptions.save_session_failed_exception import SaveSessionFailedExcept
 from app.services.frame_cache import get_keypoints
 
 logger = logging.getLogger(__name__)
+
+RISK_FRAMES_BATCH_SIZE = 200
 
 def _generate_default_session_name() -> str:
     return datetime.now().strftime("Session_%Y%m%d_%H%M%S")
@@ -49,6 +50,69 @@ def _resolve_joint_coordinates(frame: Dict[str, Any], skeleton_overlay_url: Any)
             return cached_keypoints
 
     return {}
+
+
+def _resolve_skeleton_overlay_url(frame: Dict[str, Any]) -> str:
+    skeleton_overlay_url = _first_present(
+        frame,
+        "highest_risk_image_url",
+        "image",
+        "skeleton_overlay_url",
+        "image_url",
+    )
+
+    if skeleton_overlay_url and (
+        "127.0.0.1" in str(skeleton_overlay_url) or "localhost" in str(skeleton_overlay_url)
+    ):
+        skeleton_overlay_url = ""
+
+    return skeleton_overlay_url or ""
+
+
+def _bulk_insert_risk_frames(
+    conn: Any,
+    session_id: int,
+    risk_frames: List[Dict[str, Any]],
+) -> None:
+    for batch_start in range(0, len(risk_frames), RISK_FRAMES_BATCH_SIZE):
+        batch = risk_frames[batch_start : batch_start + RISK_FRAMES_BATCH_SIZE]
+
+        values_clauses = []
+        params: Dict[str, Any] = {"session_id": session_id}
+        jsonb_bindparams = []
+
+        for idx, frame in enumerate(batch):
+            skeleton_overlay_url = _resolve_skeleton_overlay_url(frame)
+
+            values_clauses.append(
+                f"(:session_id, :frame_number_{idx}, :risk_percentage_{idx}, "
+                f":skeleton_overlay_url_{idx}, :joint_coordinates_{idx})"
+            )
+            params[f"frame_number_{idx}"] = _first_present(frame, "frame_number", "frame")
+            params[f"risk_percentage_{idx}"] = _first_present(
+                frame, "risk_percentage", "risk", "risk_score"
+            )
+            params[f"skeleton_overlay_url_{idx}"] = skeleton_overlay_url
+            params[f"joint_coordinates_{idx}"] = _resolve_joint_coordinates(
+                frame, skeleton_overlay_url
+            )
+            jsonb_bindparams.append(bindparam(f"joint_coordinates_{idx}", type_=JSONB))
+
+        insert_sql = (
+            "INSERT INTO risk_frames "
+            "(session_id, frame_number, risk_percentage, skeleton_overlay_url, joint_coordinates) "
+            "VALUES " + ", ".join(values_clauses) +
+            " RETURNING frame_id"
+        )
+
+        result = conn.execute(
+            text(insert_sql).bindparams(*jsonb_bindparams),
+            params,
+        )
+
+        inserted_rows = result.mappings().all()
+        if len(inserted_rows) != len(batch):
+            raise SaveSessionFailedException()
 
 
 def save_analysis_result(
@@ -95,43 +159,7 @@ def save_analysis_result(
             session_id = session_row["session_id"]
 
             if risk_frames:
-                for frame in risk_frames:
-                    skeleton_overlay_url = _first_present(
-                        frame,
-                        "highest_risk_image_url",
-                        "image",
-                        "skeleton_overlay_url",
-                        "image_url"
-                    )
-
-                    if skeleton_overlay_url and ("127.0.0.1" in str(skeleton_overlay_url) or "localhost" in str(skeleton_overlay_url)):
-                        skeleton_overlay_url = ""
-
-                    risk_frame_result = conn.execute(
-                        text(
-                            """
-                            INSERT INTO risk_frames
-                                (session_id, frame_number, risk_percentage, skeleton_overlay_url, joint_coordinates)
-                            VALUES
-                                (:session_id, :frame_number, :risk_percentage, :skeleton_overlay_url, :joint_coordinates)
-                            RETURNING frame_id
-                            """
-                        ).bindparams(bindparam("joint_coordinates", type_=JSONB)),
-                        {
-                            "session_id": session_id,
-                            "frame_number": _first_present(frame, "frame_number", "frame"),
-                            "risk_percentage": _first_present(
-                                frame, "risk_percentage", "risk", "risk_score"
-                            ),
-                            "skeleton_overlay_url": skeleton_overlay_url or "",
-                            "joint_coordinates": _resolve_joint_coordinates(
-                                frame, skeleton_overlay_url
-                            ),
-                        },
-                    )
-
-                    if not risk_frame_result.mappings().first():
-                        raise SaveSessionFailedException()
+                _bulk_insert_risk_frames(conn, session_id, risk_frames)
 
             feedback_result = conn.execute(
                 text(

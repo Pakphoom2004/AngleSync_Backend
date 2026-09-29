@@ -18,7 +18,6 @@ from app.services.save_analyze import save_analysis_result, logger
 router = APIRouter()
 UPLOAD_DIR = "uploads"
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -36,9 +35,9 @@ class SaveAnalyzeRequest(BaseModel):
 
 @router.post("/analyze/stream")
 async def analyze_video_stream(
-    request: Request,
-    file: UploadFile = File(...),
-    reference_video_id: int = Form(...)
+        request: Request,
+        file: UploadFile = File(...),
+        reference_video_id: int = Form(...)
 ):
     base_url = str(request.base_url).rstrip("/")
 
@@ -73,7 +72,7 @@ async def analyze_video_stream(
                     file_path,
                     reference_video_id,
                     progress_callback=progress_callback,
-                    
+
                 )
                 events.put(
                     (
@@ -136,9 +135,6 @@ async def save_analyze(payload: SaveAnalyzeRequest):
         if hasattr(payload, "model_dump")
         else payload.dict()
     )
-
-    logger.info(f"save-analyze risk_frames payload: {payload_data.get('risk_frames')}")
-
     try:
         return save_analysis_result(
             **payload_data

@@ -1,5 +1,5 @@
 import io
-import os 
+import os
 import base64
 import math
 import uuid
@@ -39,6 +39,7 @@ from app.services.video_validation import (
 GRAPH_VISIBLE_RATIO = 0.95
 MAX_GRAPH_SAMPLES = 180
 
+
 def _build_graph_samples(
         risk_scores,
         angles_per_frame,
@@ -58,8 +59,8 @@ def _build_graph_samples(
         })
 
     if (
-        highest_risk_frame_index < visible_count
-        and highest_risk_frame_index not in graph_indices
+            highest_risk_frame_index < visible_count
+            and highest_risk_frame_index not in graph_indices
     ):
         graph_indices.append(highest_risk_frame_index)
         graph_indices.sort()
@@ -84,11 +85,28 @@ def _build_graph_samples(
     )
 
 
+def _debug_log_mismatch(stage: str, error: ExerciseMismatchException):
+    """
+    Debug log แบบละเอียดตอน ExerciseMismatchException ถูก raise
+    เพื่อดูว่าตัวเลขไหน (similarity / angle_error / range_error / rule_check)
+    เป็นตัวที่ทำให้ mismatch จริง ๆ
+    """
+    details = error.details or {}
+    rule_check = details.get("rule_check", {})
+    print(
+        f"[DEBUG] ExerciseMismatch @ {stage}: "
+        f"similarity_score={error.similarity_score}, "
+        f"average_angle_error={details.get('average_angle_error')}, "
+        f"movement_range_error={details.get('movement_range_error')}, "
+        f"rule_check={rule_check}"
+    )
+
+
 def process_video_analysis(
         video_path: str,
         reference_video_id: int,
         progress_callback=None,
-       
+
 ):
     def report_progress(percent, step, message):
         if progress_callback is not None:
@@ -114,8 +132,16 @@ def process_video_analysis(
         if angles is not None:
             sample_angle_sequence.append(angles)
 
+    print(
+        f"[DEBUG] Early validation: sampled_frames={len(sample_keypoints)}, "
+        f"frames_with_valid_angles={len(sample_angle_sequence)}"
+    )
+
     if len(sample_angle_sequence) < 5:
-        pass
+        print(
+            "[DEBUG] Early validation skipped: fewer than 5 frames with "
+            "reliable keypoints, falling through to full analysis instead."
+        )
     else:
         try:
             validate_exercise_match(
@@ -124,6 +150,7 @@ def process_video_analysis(
                 reference_data["exercise_name"]
             )
         except ExerciseMismatchException as error:
+            _debug_log_mismatch("early_validation", error)
             return {
                 "status": "exercise_mismatch",
                 "can_analyze": False,
@@ -163,6 +190,7 @@ def process_video_analysis(
             reference_data["exercise_name"]
         )
     except ExerciseMismatchException as error:
+        _debug_log_mismatch("full_analysis", error)
         return {
             "status": "exercise_mismatch",
             "can_analyze": False,
@@ -224,7 +252,7 @@ def process_video_analysis(
 
     # แปลงภาพลงใน BytesIO Buffer ใน RAM
     img_byte_arr = io.BytesIO()
-    
+
     # 💥 ปรับปรุงส่วนแปลงรูปภาพเป็น Bytes ให้ครอบคลุม ป้องกัน Crash
     try:
         if hasattr(frame_image, "save"):
@@ -235,7 +263,7 @@ def process_video_analysis(
             with open(frame_image, "rb") as f:
                 img_byte_arr.write(f.read())
             try:
-                os.remove(frame_image)  
+                os.remove(frame_image)
             except Exception:
                 pass
         else:
@@ -244,9 +272,9 @@ def process_video_analysis(
         print(f"[ERROR] Failed to prepare frame image bytes: {prepare_err}")
 
     img_bytes = img_byte_arr.getvalue()
-    
+
     # 💥 กำหนด Storage Path ใน Garage (ใช้ filename ตรงๆ)
-    storage_path = filename 
+    storage_path = filename
 
     highest_risk_image_url = ""
     if len(img_bytes) > 0:
