@@ -3,12 +3,17 @@ from contextlib import contextmanager
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+url = make_url(DATABASE_URL)
+if url.drivername in ("postgres", "postgresql", "postgresql+psycopg"):
+    url = url.set(drivername="postgresql+psycopg2")
+
+engine = create_engine(url, pool_pre_ping=True)
 
 
 @contextmanager
