@@ -11,3 +11,6 @@ matplotlib==3.10.7
 google-genai
 google-generativeai==0.8.6
 ultralytics
+PyJWT
+google-auth
+requests
